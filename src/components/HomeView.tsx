@@ -3,8 +3,6 @@ import {
   ArrowRight,
   CalendarDays,
   Check,
-  Download,
-  ExternalLink,
   GraduationCap,
   Megaphone,
   Pin,
@@ -37,8 +35,6 @@ interface HomeViewProps {
     syllabus: string;
   }) => Promise<void>;
   busyCourseId: number | null;
-  onDownloadSite: () => void;
-  liveUrl: string;
 }
 
 const DEPARTMENTS = ['All', 'Computer Science', 'Architecture', 'Economics'];
@@ -51,8 +47,6 @@ export function HomeView({
   onToggleEnroll,
   onCreateCourse,
   busyCourseId,
-  onDownloadSite,
-  liveUrl,
 }: HomeViewProps) {
   const [selectedDepartment, setSelectedDepartment] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -152,7 +146,7 @@ export function HomeView({
               Unlock your true academic potential with structured courses, elite mentorship,
               transparent office resources, and a streamlined calendar built for visionary scholars.
             </p>
-            <div className="flex flex-wrap items-center gap-3.5">
+            <div className="flex flex-wrap items-center gap-4">
               <button
                 type="button"
                 onClick={handleScrollToCourses}
@@ -164,27 +158,10 @@ export function HomeView({
               <button
                 type="button"
                 onClick={() => onNavigate('academic-calendar')}
-                className="px-5 py-3 rounded-lg bg-white/10 text-white font-medium text-sm border border-[#76777b]/40 hover:bg-white/20 transition-colors cursor-pointer whitespace-nowrap"
+                className="px-6 py-3 rounded-lg bg-white/10 text-white font-medium text-sm border border-[#76777b]/40 hover:bg-white/20 transition-colors cursor-pointer whitespace-nowrap"
               >
                 View Calendar
               </button>
-              <button
-                type="button"
-                onClick={onDownloadSite}
-                className="px-5 py-3 rounded-lg bg-white/10 text-white font-medium text-sm border border-[#fed65b]/40 hover:bg-white/20 transition-colors inline-flex items-center gap-2 cursor-pointer whitespace-nowrap"
-              >
-                <Download className="w-4 h-4 text-[#fed65b]" />
-                <span>Download Full Website (.html)</span>
-              </button>
-              <a
-                href={liveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-5 py-3 rounded-lg bg-white/10 text-white font-medium text-sm border border-[#76777b]/40 hover:bg-white/20 transition-colors inline-flex items-center gap-2 cursor-pointer whitespace-nowrap"
-              >
-                <ExternalLink className="w-4 h-4 text-[#fed65b]" />
-                <span>Open in Chrome Tab</span>
-              </a>
             </div>
           </div>
 

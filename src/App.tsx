@@ -10,7 +10,6 @@ import { ScholarPortalModal } from './components/ScholarPortalModal';
 import { StudentsView } from './components/StudentsView';
 import { TeachersView } from './components/TeachersView';
 import { api } from './lib/api';
-import { downloadFullWebsiteHtml } from './lib/exportFullSiteHtml';
 import { auth, isAdminEmail, signOut } from './lib/firebase';
 import type {
   CalendarEvent,
@@ -402,26 +401,6 @@ export default function App() {
     }
   };
 
-  const liveUrl =
-    typeof window !== 'undefined' && window.location.origin.startsWith('http')
-      ? window.location.origin
-      : 'https://ais-dev-sgneeatkszdbxs7p3d2zqq-349032757418.asia-east1.run.app';
-
-  const handleDownloadFullWebsite = () => {
-    downloadFullWebsiteHtml({
-      overview,
-      courses,
-      notices,
-      teachers,
-      teacherAttendance,
-      savedTimetables,
-      students,
-      studentResults,
-      calendarEvents,
-      liveUrl,
-    });
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-[#f7f9ff] text-[#181c20]">
       <Navbar
@@ -433,7 +412,6 @@ export default function App() {
         enrollmentCount={enrollments.length}
         onOpenPortal={() => setPortalOpen(true)}
         onOpenAuth={() => setAuthModalOpen(true)}
-        onDownloadSite={handleDownloadFullWebsite}
       />
 
       <main className="w-full pt-20 flex-grow">
@@ -481,8 +459,6 @@ export default function App() {
                 onToggleEnroll={handleToggleEnroll}
                 onCreateCourse={handleCreateCourse}
                 busyCourseId={busyCourseId}
-                onDownloadSite={handleDownloadFullWebsite}
-                liveUrl={liveUrl}
               />
             )}
 
@@ -522,7 +498,6 @@ export default function App() {
                 onSaveStudentResult={handleSaveStudentResult}
                 onDeleteStudentResult={handleDeleteStudentResult}
                 onSignOut={handleSignOut}
-                onDownloadSite={handleDownloadFullWebsite}
               />
             )}
 
@@ -604,21 +579,6 @@ export default function App() {
             >
               Academic Calendar
             </button>
-            <button
-              type="button"
-              onClick={handleDownloadFullWebsite}
-              className="font-semibold text-[#735c00] hover:text-[#181c20] cursor-pointer"
-            >
-              Download Full Site (.html)
-            </button>
-            <a
-              href={liveUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold text-[#181c20] hover:text-[#735c00]"
-            >
-              Open in Chrome
-            </a>
           </div>
         </div>
       </footer>

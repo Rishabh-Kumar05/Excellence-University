@@ -3,13 +3,11 @@ import {
   AlertCircle,
   Award,
   CalendarClock,
-  Download,
   Megaphone,
   Pin,
   Search,
 } from 'lucide-react';
 import { isNoticeForAudience } from '../lib/api';
-import { downloadTimetableHtml } from '../lib/exportTimetableHtml';
 import {
   calculateGrade,
   DAY_NAMES,
@@ -256,26 +254,6 @@ export function StudentsView({
                   View the official university timetable published by administration (read-only).
                 </p>
               </div>
-              {activeTimetable && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    downloadTimetableHtml({
-                      title: activeTimetable.title,
-                      sectionsCount: activeTimetable.sectionsCount,
-                      teachersCount: activeTimetable.teachersCount,
-                      roomsCount: activeTimetable.roomsCount,
-                      daysCount: activeTimetable.daysCount,
-                      groups: activeTimetable.groups,
-                      slots: activeTimetable.slots,
-                    })
-                  }
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#c6c6ca] bg-white text-xs font-semibold text-[#181c20] hover:bg-[#f1f4f9] cursor-pointer self-start md:self-auto"
-                >
-                  <Download className="w-4 h-4 text-[#735c00]" />
-                  <span>Save HTML File</span>
-                </button>
-              )}
             </div>
 
             {absentTodayTeachers.length > 0 && (

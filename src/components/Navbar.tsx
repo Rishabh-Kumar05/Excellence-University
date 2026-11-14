@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BookOpen, Download, Lock, LogIn, Menu, X } from 'lucide-react';
+import { BookOpen, Lock, LogIn, Menu, X } from 'lucide-react';
 import type { PagePath } from '../types';
 
 interface NavbarProps {
@@ -11,7 +11,6 @@ interface NavbarProps {
   enrollmentCount: number;
   onOpenPortal: () => void;
   onOpenAuth: () => void;
-  onDownloadSite: () => void;
 }
 
 const NAV_ITEMS: Array<{ path: PagePath; label: string; protected?: boolean; adminOnly?: boolean }> = [
@@ -31,7 +30,6 @@ export function Navbar({
   enrollmentCount,
   onOpenPortal,
   onOpenAuth,
-  onDownloadSite,
 }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -96,17 +94,7 @@ export function Navbar({
         </nav>
 
         {/* Zone 3: Primary Action */}
-        <div className="flex items-center gap-2.5 shrink-0">
-          <button
-            type="button"
-            onClick={onDownloadSite}
-            title="Download full offline website (.html) to open in Chrome"
-            className="hidden md:inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg border border-[#c6c6ca] bg-white text-[#181c20] text-xs font-semibold hover:bg-[#ebeef3] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-          >
-            <Download className="w-3.5 h-3.5 text-[#735c00]" />
-            <span>Download HTML</span>
-          </button>
-
+        <div className="flex items-center gap-3 shrink-0">
           {isSignedIn ? (
             <button
               type="button"
@@ -163,18 +151,6 @@ export function Navbar({
               </button>
             );
           })}
-
-          <button
-            type="button"
-            onClick={() => {
-              setMobileMenuOpen(false);
-              onDownloadSite();
-            }}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-[#c6c6ca] bg-white text-[#181c20] text-sm font-semibold mt-2 cursor-pointer"
-          >
-            <Download className="w-4 h-4 text-[#735c00]" />
-            <span>Download Full Website (.html)</span>
-          </button>
 
           {isSignedIn ? (
             <button
