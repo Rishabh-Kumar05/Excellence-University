@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GEC Campus Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050b2e;--card:rgba(30,58,160,.26);--ink:#eaf0ff;--mut:#a3b6ea;--line:rgba(120,150,255,.28);--pri:#0a1240;--acc:#1f6bff;--amb:#ffc400;--red:#ff7b7b;--redbg:rgba(255,80,80,.18);--ok:#4fd392;--okbg:rgba(79,211,146,.16);--tint:rgba(80,120,255,.2);color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 "Source Sans 3",system-ui,sans-serif;min-height:100vh}
+h1,h2,h3{font-family:"Bricolage Grotesque","Segoe UI",sans-serif;margin:0 0 .4em;line-height:1.15}
+h1{font-size:clamp(1.9rem,6vw,3rem);font-weight:800}h2{font-size:1.4rem}h3{font-size:1.1rem}
+main{max-width:1080px;margin:0 auto;padding:16px}
+.bar{background:var(--pri);color:#fff}.bar div{max-width:1080px;margin:0 auto;padding:12px 16px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.brand{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:1.15rem;cursor:pointer}.brand span{color:var(--amb)}
+button,select,input,textarea{font:inherit;color:inherit}
+.btn{background:var(--pri);color:#fff;border:0;border-radius:8px;padding:9px 16px;cursor:pointer;font-weight:600}
+.bar .btn{background:rgba(255,255,255,.14)}.btn.acc{background:var(--acc);color:#fff}.btn.ghost{background:var(--tint);color:var(--ink);border:1px solid var(--line)}.btn.sm{padding:5px 10px;font-size:.85rem}.btn.del{background:var(--redbg);color:var(--red)}.btn:disabled{opacity:.45}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--amb);outline-offset:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.live{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:var(--redbg);color:var(--red);font-weight:600;margin:14px 0}
+.live.ok{background:var(--okbg);color:var(--ok)}
+.dot{width:11px;height:11px;border-radius:50%;background:currentColor;flex:none}.live:not(.ok) .dot{animation:bl 1s steps(2,start) infinite}
+@keyframes bl{to{visibility:hidden}}
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:10px}
+.role{text-align:left;background:var(--card);border:1px solid var(--line);border-left:6px solid var(--acc);border-radius:12px;padding:18px;cursor:pointer}
+.role:nth-child(2){border-left-color:var(--amb)}.role:nth-child(3){border-left-color:var(--red)}.role b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-size:1.25rem}.role small{color:var(--mut)}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin:12px 0;padding-bottom:4px}
+.tab{white-space:nowrap;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 14px;cursor:pointer}.tab.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;background:var(--card)}th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:var(--tint);font-size:.9rem}
+.tt{min-width:760px}.tt td,.tt th{border-right:1px solid var(--line)}.tt td small{display:block;color:var(--mut);font-size:.8rem}.tt td em{display:block;color:var(--red);font-size:.78rem;font-style:normal;font-weight:600}
+.tt tr.today td:first-child,.tt tr.today th{background:var(--amb);color:#16233b}
+.tt select{width:100%;padding:5px;border-radius:6px;border:1px solid var(--line);background:var(--card)}
+td.blink{animation:bk 1s steps(2,start) infinite;color:var(--red)}
+@keyframes bk{0%{background:var(--redbg)}50%{background:var(--red);color:#fff}}
+@media (prefers-reduced-motion:reduce){td.blink,.dot{animation:none!important}td.blink{background:var(--redbg);outline:2px solid var(--red)}}
+.chip{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.82rem;font-weight:600}.p{background:var(--okbg);color:var(--ok)}.a{background:var(--redbg);color:var(--red)}.n{background:var(--tint);color:var(--mut)}
+.notice{border-left:5px solid var(--acc);padding:10px 14px;background:var(--card);border:1px solid var(--line);border-left-width:5px;border-radius:10px;margin-bottom:10px}.notice small{color:var(--mut)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+label{display:block;font-weight:600;margin:8px 0 3px}input,select,textarea{width:100%;padding:9px;border-radius:8px;border:1px solid var(--line);background:var(--card)}
+.bartrack{height:10px;background:var(--tint);border-radius:6px;overflow:hidden}.bartrack i{display:block;height:100%;background:var(--ok)}.bartrack i.lo{background:var(--red)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.cal div{background:var(--card);border:1px solid var(--line);border-radius:8px;min-height:64px;padding:4px;font-size:.8rem}.cal .h{min-height:0;text-align:center;background:var(--tint);font-weight:600}.cal .hol{background:var(--redbg);color:var(--red)}.cal .ev{background:var(--okbg)}.cal .tdy{outline:3px solid var(--amb)}.cal b{display:block}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.mut{color:var(--mut)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--pri);color:#fff;padding:10px 18px;border-radius:10px;z-index:9}
+.err{color:var(--red);font-weight:600}
+.lt{display:inline-block;width:13px;height:13px;border-radius:50%;background:var(--line);vertical-align:middle;margin-right:6px}.lt.g{background:var(--ok);box-shadow:0 0 0 3px var(--okbg)}.lt.r{background:var(--red);box-shadow:0 0 0 3px var(--redbg)}
+.lnk{background:none;border:0;padding:0;font-weight:700;color:var(--acc);text-decoration:underline;cursor:pointer;font-size:inherit}
+.cal .clk{cursor:pointer}.cal .lt{margin:6px 0 0;display:block}tr.sel td{background:var(--tint)}
+
+html{background:#050b2e}
+body{background:radial-gradient(1200px 700px at 20% -10%,#14309a 0%,transparent 60%),radial-gradient(900px 600px at 100% 100%,#0b2a8a 0%,transparent 55%),linear-gradient(180deg,#060d36,#040924);background-attachment:fixed}
+select option{background:#0b1650;color:#fff}
+.btn.ghost{background:rgba(80,120,255,.18)}
+.tt tr.today td:first-child,.tt tr.today th{color:#0a1240}
+.toast{background:#1f6bff}
+.card,.role,.notice{backdrop-filter:blur(6px)}
+.shell{display:flex;min-height:100vh}
+.side{width:268px;flex:none;position:sticky;top:0;height:100vh;padding:14px;z-index:30}
+.side-in{height:100%;display:flex;flex-direction:column;padding:16px 12px;border-radius:22px;border:1px solid rgba(120,150,255,.35);background:linear-gradient(180deg,rgba(40,75,210,.35),rgba(8,18,85,.7));box-shadow:0 0 40px rgba(30,80,255,.25),inset 0 0 30px rgba(60,100,255,.12);overflow-y:auto}
+.sb-brand{text-align:center;cursor:pointer;padding:6px 0 4px}
+.sb-brand svg{width:78px;height:78px;display:block;margin:0 auto 8px}
+.sb-brand b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-size:1.6rem;color:#fff;letter-spacing:.5px}
+.sb-brand span{display:block;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:1.05rem;color:var(--amb)}
+.sb-line{height:1px;margin:14px 8px;background:linear-gradient(90deg,transparent,#5b86ff,transparent);position:relative}
+.sb-line:after{content:"";position:absolute;left:50%;top:-3px;width:7px;height:7px;background:#8fb0ff;transform:translateX(-50%) rotate(45deg)}
+.nav{display:flex;flex-direction:column;gap:6px;flex:1}
+.nv{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:transparent;border:0;border-radius:14px;padding:12px 14px;color:#e6edff;font-weight:600;font-size:1rem;cursor:pointer}
+.nv svg{width:24px;height:24px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nv:hover{background:rgba(120,150,255,.16)}
+.nv.on{background:linear-gradient(180deg,#2f86ff,#1b5bff);color:#fff;box-shadow:0 6px 20px rgba(31,107,255,.5)}
+.nv .bd{margin-left:auto;background:#ff2d3d;color:#fff;border-radius:999px;min-width:22px;height:22px;display:grid;place-items:center;font-size:.78rem;font-weight:700;padding:0 6px}
+.sb-foot{text-align:center;margin-top:10px;color:var(--amb);font-weight:700;font-size:.82rem}
+.sb-foot svg{width:38px;height:38px;stroke:#4ea0ff;fill:none;stroke-width:1.8;margin-bottom:4px}
+.sb-foot small{display:block;color:#fff;font-weight:600}
+.sb-act{display:flex;gap:8px;margin-top:10px}.sb-act .btn{flex:1;background:rgba(255,255,255,.12);padding:8px}
+.content{flex:1;min-width:0}
+.mbar{display:none}
+.scrim{display:none}
+@media (max-width:860px){
+ .side{position:fixed;left:0;top:0;width:min(290px,84vw);transform:translateX(-110%);transition:transform .25s ease;padding-top:calc(14px + env(safe-area-inset-top,0px))}
+ .side.open{transform:none}
+ .scrim.open{display:block;position:fixed;inset:0;background:rgba(0,0,10,.55);z-index:20}
+ .mbar{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--pri);color:#fff;position:sticky;top:0;z-index:10}
+ .mbar .brand{flex:1}
+ .hb{background:rgba(255,255,255,.14);border:0;border-radius:10px;width:42px;height:42px;display:grid;place-items:center;cursor:pointer;color:#fff}
+ .hb svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round}
+}
+@media (prefers-reduced-motion:reduce){.side{transition:none}}
+</style></head><body>
+<div id="app"></div><div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const NOW=new Date(),TK=iso(NOW),TD=(NOW.getDay()+6)%7;
+const addD=n=>{const d=new Date(NOW);d.setDate(d.getDate()+n);return iso(d)};
+const D=["Mon","Tue","Wed","Thu","Fri","Sat"],P=["9:00","10:00","11:00","12:00","2:00","3:00"],PS=[9,10,11,12,14,15];
+const MN=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const KEY="gec-portal-v2";let S,U={view:"home",tab:"",role:"",tid:"",stu:"",m:[NOW.getFullYear(),NOW.getMonth()]};
+const tm=id=>S.teachers.find(t=>t.id===id);
+const absent=id=>S.att[TK]&&S.att[TK][id]==="A";
+const avail=(id,d)=>!tm(id).off.includes(d)&&!(d===TD&&absent(id));
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+function toast(m){const t=$("#toast");t.innerHTML='<div class="toast">'+esc(m)+'</div>';setTimeout(()=>t.innerHTML="",2200)}
+function seed(){
+ const s={teachers:[],subjects:{},att:{},log:{},notices:[],events:[],stu:{},tt:null};
+ S=s;S.tt=gen();return s}
+const YRS=[1,2,3,4],SEC=["A","B","C","D","E","F"],yname=y=>["","1st","2nd","3rd","4th"][y]+" year";
+const CK=[];YRS.forEach(y=>SEC.forEach(c=>CK.push(y+c)));
+const emptyTT=()=>Array.from({length:6},()=>Array(6).fill(null));
+function subsFor(y){return Object.keys(S.subjects).filter(k=>!S.subjects[k].y||+S.subjects[k].y===y)}
+/* one teacher cannot be in two sections in the same slot */
+function clash(key,d,p,k){const t=S.subjects[k]&&S.subjects[k].t;if(!t)return"";
+ for(const c of CK){if(c===key)continue;const x=S.tt[c]&&S.tt[c][d][p];if(x&&S.subjects[x]&&S.subjects[x].t===t)return c}return""}
+function gen(){const tt={},rem={},used={};
+ CK.forEach(c=>{tt[c]=emptyTT();rem[c]={};used[c]=[{},{},{},{},{},{}];subsFor(+c[0]).forEach(k=>rem[c][k]=6)});
+ const busy={};
+ for(let d=0;d<6;d++)for(let p=0;p<6;p++){
+  const order=CK.slice((d*6+p)*5%24).concat(CK.slice(0,(d*6+p)*5%24));
+  order.forEach(c=>{const prev=p?tt[c][d][p-1]:null,u=used[c][d];
+   const ok=Object.keys(rem[c]).filter(k=>{const t=S.subjects[k].t;return rem[c][k]>0&&tm(t)&&avail(t,d)&&(u[k]||0)<2&&!(busy[d+"-"+p]||{})[t]})
+    .sort((x,y)=>((x===prev)-(y===prev))||((u[x]||0)-(u[y]||0))||(rem[c][y]-rem[c][x]));
+   const k=ok[0]||null;
+   if(k){rem[c][k]--;u[k]=(u[k]||0)+1;tt[c][d][p]=k;(busy[d+"-"+p]=busy[d+"-"+p]||{})[S.subjects[k].t]=1}})}
+ return tt}
+try{const r=localStorage.getItem(KEY);S=r?JSON.parse(r):null}catch(e){S=null}
+if(!S){seed();save()}
+if(Array.isArray(S.tt)||!S.tt){S.tt=gen();save()}
+const st=(id,d)=>{const v=S.att[d]&&S.att[d][id];return v||(d===TK?"P":"")};
+const hist=(id,c)=>Object.keys(S.att).filter(d=>S.att[d]&&S.att[d][id]===c).sort().reverse();
+const absDates=id=>hist(id,"A");
+const presDates=id=>{const l=hist(id,"P");if(st(id,TK)==="P"&&!l.includes(TK))l.unshift(TK);return l.sort().reverse()};
+const fd=s=>{const[y,m,d]=s.split("-");return d+" "+MN[m-1].slice(0,3)+" "+y};
+const grade=m=>m>=90?["O",10]:m>=80?["E",9]:m>=70?["A",8]:m>=60?["B",7]:m>=50?["C",6]:m>=40?["D",5]:["F",0];
+
+/* ---------- navigation & auth ---------- */
+function go(v,role){U.view=v;U.role=role||"";U.tab=v==="student"?"notices":v==="teacher"?"today":v==="staff"?"timetable":"";if(v==="home"){U.tid="";U.stu="";U.staff=0}render()}
+function tab(t){U.tab=t;U.edit="";U.nav=0;render()}
+function navT(){U.nav=!U.nav;render()}
+function login(role){const id=($("#lid").value||"").trim(),pw=$("#lpw").value;let ok=false;
+ if(role==="staff"){ok=id.toLowerCase()==="admin"&&pw==="staff123";if(ok)U.staff=1}
+ else if(role==="teacher"){const t=tm(id.toUpperCase());ok=!!t&&pw===(t.pw||"teacher123");if(ok)U.tid=t.id}
+ else{const s=S.stu[id.toUpperCase()];ok=!!s&&s.pw===pw;if(ok)U.stu=id.toUpperCase()}
+ if(!ok){U.err="Wrong ID or password. Check the demo login shown below the form.";render();return}
+ U.err="";if(role!=="student")go(role,"");else render()}
+function logout(){U.tid="";U.stu="";U.staff=0;go("home")}
+function loginForm(role){const hint={staff:"Login: admin / staff123",teacher:"Teacher ID and password are given by academic staff. Default password: teacher123",student:"Roll number and password are given by academic staff"}[role];
+ return `<div class="card" style="max-width:420px"><h3>${role==="staff"?"Academic staff":role==="teacher"?"Teacher":"Student"} login</h3>
+ <label for="lid">${role==="staff"?"Staff ID":role==="teacher"?"Teacher ID":"Roll number"}</label><input id="lid" autocomplete="username">
+ <label for="lpw">Password</label><input id="lpw" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')login('${role}')">
+ ${U.err?`<p class="err">${U.err}</p>`:""}<p><button class="btn acc" onclick="login('${role}')">Log in</button></p><small class="mut">${hint}</small></div>`}
+
+/* ---------- shared pieces ---------- */
+function classPick(){const y=U.yr||1,c=U.sec||"A";
+ return `<div class="row" style="margin:10px 0"><div style="flex:1;min-width:130px"><label for="yrs">Year</label><select id="yrs" onchange="setYS(+this.value,U.sec||'A')">${YRS.map(v=>`<option value="${v}" ${v===y?"selected":""}>${yname(v)}</option>`).join("")}</select></div><div style="flex:1;min-width:130px"><label for="scs">Section</label><select id="scs" onchange="setYS(U.yr||1,this.value)">${SEC.map(v=>`<option ${v===c?"selected":""}>${v}</option>`).join("")}</select></div></div>`}
+function setYS(y,c){U.yr=y;U.sec=c;U.picked=1;render()}
+function ttTable(mode,tid){
+ const key=(U.yr||1)+(U.sec||"A"),T=S.tt[key]||emptyTT();
+ let h='<div class="wrap"><table class="tt"><thead><tr><th>Day</th>'+P.map((t,i)=>`<th>P${i+1} · ${t}</th>`).join("")+"</tr></thead><tbody>";
+ for(let d=0;d<6;d++){h+=`<tr class="${d===TD?"today":""}"><th>${D[d]}</th>`;
+  for(let p=0;p<6;p++){let c="",bl=false;
+   if(mode==="teacher"){const at=CK.filter(x=>{const k=S.tt[x]&&S.tt[x][d][p];return k&&S.subjects[k]&&S.subjects[k].t===tid});
+    const ab=d===TD&&absent(tid);bl=at.length&&ab;
+    c=at.length?at.map(x=>{const k=S.tt[x][d][p];return `<b>${esc(S.subjects[k].n)}</b><small>${yname(+x[0])} · Sec ${x[1]}</small>`}).join("")+(ab?"<em>You are absent</em>":""):'<span class="mut">–</span>'}
+   else{const k=T[d][p],sb=k&&S.subjects[k],t=sb&&tm(sb.t),ab=d===TD&&t&&absent(t.id);bl=ab;
+    if(mode==="staff")c=`<select aria-label="${D[d]} period ${p+1}" onchange="setCell('${key}',${d},${p},this.value)"><option value="">Free</option>${subsFor(+key[0]).map(x=>{const cl=x!==k?clash(key,d,p,x):"";const u=(!avail(S.subjects[x].t,d)&&x!==k)||!!cl;return`<option value="${x}" ${x===k?"selected":""} ${u?"disabled":""}>${esc(S.subjects[x].n)} – ${esc(tm(S.subjects[x].t).name.split(" ").slice(-1)[0])}${cl?" (in "+cl+")":!avail(S.subjects[x].t,d)&&x!==k?" (unavailable)":""}</option>`}).join("")}</select>${ab?"<em>Teacher absent</em>":""}`;
+    else c=k?`<b>${esc(sb.n)}</b><small>${esc(t.name)}</small>${ab?"<em>Teacher absent</em>":""}`:'<span class="mut">Free</span>'}
+   h+=`<td class="${bl?"blink":""}">${c}</td>`}h+="</tr>"}
+ return h+"</tbody></table></div>"}
+function absentBanner(){const n=S.teachers.filter(t=>absent(t.id));return n.length?`<div class="live"><span class="dot"></span>Absent today: ${n.map(t=>esc(t.name)).join(", ")}. Their classes blink red in the timetable.</div>`:""}
+function notices(aud){const l=S.notices.filter(n=>aud==="staff"||n.a==="all"||n.a===aud).sort((a,b)=>b.id-a.id);
+ return l.length?l.map(n=>`<div class="notice"><b>${esc(n.t)}</b><div>${esc(n.b)}</div><small>${fd(n.d)} · for ${n.a==="all"?"everyone":n.a+"s"}</small>${aud==="staff"?` <button class="btn sm del" onclick="delNotice(${n.id})">Delete</button>`:""}</div>`).join(""):'<p class="mut">No notices yet.</p>'}
+function directory(){if(!S.teachers.length)return'<p class="mut">No teachers added yet.</p>';return `<div class="wrap"><table><thead><tr><th>Teacher</th><th>Room</th><th>Today</th></tr></thead><tbody>${S.teachers.map(t=>`<tr><td><b>${esc(t.name)}</b><br><small class="mut">${t.id}</small></td><td>${esc(t.room)}</td><td><span class="lt ${absent(t.id)?"r":"g"}"></span><span class="chip ${absent(t.id)?"a":"p"}">${absent(t.id)?"Absent":"Present"}</span></td></tr>`).join("")}</tbody></table></div>`}
+function tcal(id,edit){const[y,m]=U.m,first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();
+ let h=`<div class="row" style="justify-content:space-between;margin-bottom:8px"><button class="btn ghost sm" onclick="calNav(-1)" aria-label="Previous month">Prev</button><h3 style="margin:0">${MN[m]} ${y}</h3><button class="btn ghost sm" onclick="calNav(1)" aria-label="Next month">Next</button></div><div class="cal">`+["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(x=>`<div class="h">${x}</div>`).join("");
+ for(let i=0;i<first;i++)h+="<div></div>";
+ for(let d=1;d<=days;d++){const k=y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0"),v=st(id,k),sun=new Date(y,m,d).getDay()===0;
+  h+=`<div class="${sun?"hol":""} ${k===TK?"tdy":""} ${edit?"clk":""}" ${edit?`onclick="cycle('${id}','${k}')"`:""}><b>${d}</b>${v==="P"?'<span class="lt g" role="img" aria-label="Present"></span>':v==="A"?'<span class="lt r" role="img" aria-label="Absent"></span>':""}</div>`}
+ return h+'</div><p class="mut"><span class="lt g"></span>Present &nbsp; <span class="lt r"></span>Absent &nbsp; (no light = not marked)</p>'}
+function teacherAtt(t,edit){const A=absDates(t.id),Pd=presDates(t.id);
+ const ch=(l,c)=>l.length?l.map(d=>`<span class="chip ${c}" style="margin:2px">${fd(d)}</span>`).join(" "):'<span class="mut">None</span>';
+ return `<h3><span class="lt ${absent(t.id)?"r":"g"}"></span>${esc(t.name)} · ${t.id}</h3><p>Present: <b>${Pd.length}</b> days &nbsp;·&nbsp; Absent: <b>${A.length}</b> days</p>${edit?'<p class="mut">Tap a date to change: Present (green), Absent (red), then back.</p>':""}`+tcal(t.id,edit)+`<div class="grid2" style="margin-top:12px"><div><h3>Absent on</h3>${ch(A,"a")}</div><div><h3>Present on</h3>${ch(Pd,"p")}</div></div>`}
+function cycle(id,k){const v=st(id,k);S.att[k]=S.att[k]||{};if(v==="")S.att[k][id]="P";else if(v==="P")S.att[k][id]="A";else if(k===TK)S.att[k][id]="P";else delete S.att[k][id];save();render()}
+function selT(id){U.tsel=U.tsel===id?"":id;render()}
+function subs(l){return `<div class="row" style="margin-bottom:10px">${l.map(([k,t])=>`<button class="btn sm ${(U.sub||"att")===k?"acc":"ghost"}" onclick="U.sub='${k}';render()">${t}</button>`).join("")}</div>`}
+function staffTeachers(){if(!S.teachers.length)return'<h2>Teacher attendance</h2><p class="mut">No teachers added yet. Add them in the Setup tab.</p>';const sel=tm(U.tsel);
+ let h=`<h2>Teacher attendance</h2><p class="mut">Tap a teacher name to open the attendance calendar.</p><div class="wrap"><table><thead><tr><th>Teacher</th><th>Today</th></tr></thead><tbody>${S.teachers.map(t=>`<tr class="${t.id===U.tsel?"sel":""}"><td><span class="lt ${absent(t.id)?"r":"g"}"></span><button class="lnk" onclick="selT('${t.id}')">${esc(t.name)}</button><br><small class="mut">${t.id} · ${esc(t.room)}</small></td><td><button class="btn sm ${absent(t.id)?"del":"ghost"}" onclick="toggleAbs('${t.id}')">${absent(t.id)?"Absent":"Present"}</button></td></tr>`).join("")}</tbody></table></div>`;
+ if(sel)h+=`<div class="card" style="margin-top:14px">${teacherAtt(sel,true)}<h3 style="margin-top:12px">Weekly off days</h3><div class="row">${D.map((x,i)=>`<button class="btn sm ${sel.off.includes(i)?"del":"ghost"}" onclick="toggleOff('${sel.id}',${i})" aria-pressed="${sel.off.includes(i)}">${x}</button>`).join(" ")}</div></div>`;
+ return h}
+function staffStudents(){const ks=Object.keys(S.stu),js=Object.keys(S.subjects);
+ let h='<h2>Student marks and attendance</h2>';
+ if(!ks.length||!js.length)h+='<p class="mut">Add at least one student and one subject in the Setup tab first.</p>';
+ else h+=`<div class="grid2"><div><label for="ms">Student</label><select id="ms">${ks.map(k=>`<option value="${k}">${esc(S.stu[k].n)} (${k})</option>`).join("")}</select></div><div><label for="mj">Subject</label><select id="mj">${js.map(k=>`<option value="${k}">${esc(S.subjects[k].n)}</option>`).join("")}</select></div><div><label for="mm">Marks (out of 100)</label><input id="mm" type="number"></div><div><label for="ma">Classes attended</label><input id="ma" type="number"></div><div><label for="mt">Total classes</label><input id="mt" type="number"></div></div><p><button class="btn acc" onclick="addRecord()">Save record</button></p>`;
+ h+=`<h3>All students (${ks.length})</h3>`+(ks.length?`<div class="wrap"><table><thead><tr><th>Student</th><th>Attendance</th><th>Marks</th></tr></thead><tbody>${ks.map(k=>{const s=S.stu[k],sj=Object.keys(s.att);let a=0,b=0;sj.forEach(j=>{a+=s.att[j][0];b+=s.att[j][1]});const ov=b?Math.round(a/b*100):null,nm=j=>esc(S.subjects[j]?S.subjects[j].n:j);
+  return `<tr><td><b>${esc(s.n)}</b><br><small class="mut">${esc(k)}</small></td><td>${ov===null?'<span class="mut">Not added</span>':`<span class="chip ${ov<75?"a":"p"}">${ov}%</span>`+sj.map(j=>`<br><small>${nm(j)}: ${s.att[j][0]}/${s.att[j][1]}</small>`).join("")}</td><td>${Object.keys(s.res).length?Object.keys(s.res).map(j=>`<small>${nm(j)}: ${s.res[j]}</small>`).join("<br>"):'<span class="mut">–</span>'}</td></tr>`}).join("")}</tbody></table></div>`:'<p class="mut">No students yet.</p>');
+ return h}
+function staffDetails(){if(!S.teachers.length)return'<h2>Teacher login details</h2><p class="mut">No teachers added yet. Add them in the Setup tab.</p>';
+ const sel=(U.dsel||[]).filter(id=>tm(id));
+ const cell=(t,f)=>{const key=f+":"+t.id,val=f==="id"?t.id:(t.pw||"teacher123");
+  return U.edit===key?`<div class="row"><input id="ev" value="${esc(val)}" data-af="1" style="min-width:110px;width:auto;flex:1" onkeydown="if(event.key==='Enter')saveEdit('${f}','${t.id}')"><button class="btn sm acc" onclick="saveEdit('${f}','${t.id}')">Save</button><button class="btn sm ghost" onclick="U.edit='';render()">Cancel</button></div>`:`<button class="lnk" onclick="U.edit='${key}';render()" title="Tap to change">${esc(val)}</button>`};
+ return `<h2>Teacher login details</h2><p class="mut">Tap an ID or password to change it. Teachers log in with these.</p><div class="wrap"><table><thead><tr><th>Teacher</th><th>ID</th><th>Password</th><th>Select</th></tr></thead><tbody>${S.teachers.map(t=>`<tr><td><b>${esc(t.name)}</b><br><small class="mut">${esc(t.room)}</small></td><td>${cell(t,"id")}</td><td>${cell(t,"pw")}</td><td><input type="checkbox" aria-label="Select ${esc(t.name)}" ${sel.includes(t.id)?"checked":""} onchange="togSel('${t.id}')" style="width:22px;height:22px"></td></tr>`).join("")}</tbody></table></div><p style="margin-top:12px"><button class="btn del" ${sel.length?"":"disabled"} onclick="delSelected()">Delete selected${sel.length?" ("+sel.length+")":""}</button></p>`}
+function togSel(id){U.dsel=U.dsel||[];U.dsel=U.dsel.includes(id)?U.dsel.filter(x=>x!==id):[...U.dsel,id];render()}
+function delSelected(){const ids=(U.dsel||[]).filter(id=>tm(id));if(!ids.length){toast("Select a teacher first");return}
+ if(!confirm("Delete "+ids.length+" teacher(s)? Their subjects, timetable slots and attendance will also be removed."))return;
+ const subs=Object.keys(S.subjects).filter(k=>ids.includes(S.subjects[k].t));
+ S.teachers=S.teachers.filter(t=>!ids.includes(t.id));
+ subs.forEach(k=>{delete S.subjects[k];Object.keys(S.stu).forEach(r=>{delete S.stu[r].att[k];delete S.stu[r].res[k]})});
+ if(S.tt)Object.values(S.tt).forEach(g=>g.forEach(row=>row.forEach((k,i)=>{if(subs.includes(k))row[i]=null})));
+ Object.keys(S.att).forEach(d=>{if(S.att[d])ids.forEach(id=>{delete S.att[d][id]})});
+ if(ids.includes(U.tsel))U.tsel="";U.dsel=[];save();render();toast(ids.length+" teacher(s) deleted")}
+function saveEdit(f,id){const v=($("#ev").value||"").trim(),t=tm(id);if(!v){toast("Cannot be empty");return}
+ if(f==="pw"){t.pw=v;U.edit="";save();render();toast("Password updated");return}
+ const nv=v.toUpperCase();if(/\s/.test(nv)){toast("ID cannot have spaces");return}
+ if(nv!==id&&tm(nv)){toast("This ID is already used");return}
+ t.id=nv;Object.keys(S.subjects).forEach(k=>{if(S.subjects[k].t===id)S.subjects[k].t=nv});Object.keys(S.att).forEach(d=>{if(S.att[d]&&id in S.att[d]){S.att[d][nv]=S.att[d][id];if(nv!==id)delete S.att[d][id]}});
+ if(U.tsel===id)U.tsel=nv;U.edit="";save();render();toast("ID updated")}
+function calendar(){const[y,m]=U.m,first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();
+ let h=`<div class="row" style="justify-content:space-between;margin-bottom:8px"><button class="btn ghost sm" onclick="calNav(-1)" aria-label="Previous month">Prev</button><h3 style="margin:0">${MN[m]} ${y}</h3><button class="btn ghost sm" onclick="calNav(1)" aria-label="Next month">Next</button></div><div class="cal">`+["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(x=>`<div class="h">${x}</div>`).join("");
+ for(let i=0;i<first;i++)h+="<div></div>";const list=[];
+ for(let d=1;d<=days;d++){const k=y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0"),ev=S.events.filter(e=>e.d===k),sun=new Date(y,m,d).getDay()===0,hol=sun||ev.some(e=>e.k==="holiday");
+  ev.forEach(e=>list.push(e));h+=`<div class="${hol?"hol":ev.length?"ev":""} ${k===TK?"tdy":""}"><b>${d}</b>${ev.map(e=>esc(e.t)).join("<br>")||(sun?"Sunday":"")}</div>`}
+ h+="</div><h3 style='margin-top:14px'>This month</h3>"+(list.length?list.sort((a,b)=>a.d>b.d?1:-1).map(e=>`<p><span class="chip ${e.k==="holiday"?"a":"p"}">${e.k==="holiday"?"Holiday":"Event"}</span> ${fd(e.d)} – ${esc(e.t)}${U.view==="staff"?` <button class="btn sm del" onclick="delEvent('${e.d}','${esc(e.t).replace(/'/g,"")}')">Remove</button>`:""}</p>`).join(""):'<p class="mut">No holidays or events this month. Sundays are off.</p>');return h}
+function calNav(n){let[y,m]=U.m;m+=n;if(m<0){m=11;y--}if(m>11){m=0;y++}U.m=[y,m];render()}
+let SIDE=[];const tabs=(l)=>{SIDE=l;return""};
+
+/* ---------- views ---------- */
+function home(){
+ return `<h1>GEC Campus Portal</h1><p class="mut" style="max-width:56ch">Gandhi Engineering College, Bhubaneswar. Notices, timetables, attendance and results in one place. Choose how you are signing in.</p>
+ <div class="roles"><button class="role" onclick="go('student')"><b>Student</b><small>Notices, timetable, attendance, results, calendar</small></button>
+ <button class="role" onclick="go('login','teacher')"><b>Teacher</b><small>Your schedule, notices, absence record</small></button>
+ <button class="role" onclick="go('login','staff')"><b>Academic staff</b><small>Timetable, notices, attendance, calendar</small></button></div>`}
+function student(){
+ const lock=()=>U.stu?"":loginForm("student"),me=S.stu[U.stu];let c="";
+ if(U.tab==="notices")c=notices("student");
+ else if(U.tab==="timetable"){const me0=S.stu[U.stu];if(me0&&me0.y&&!U.picked){U.yr=+me0.y;U.sec=me0.sec||"A"}c=absentBanner()+'<h2>Class timetable</h2>'+classPick()+ttTable("student")}
+ else if(U.tab==="teachers")c='<h2>Teacher availability today</h2>'+absentBanner()+directory()+`<p class="mut">Weekly off days: ${S.teachers.filter(t=>t.off.length).map(t=>t.name+" ("+t.off.map(d=>D[d]).join(", ")+")").join("; ")||"none"}.</p>`;
+ else if(U.tab==="attendance")c=!U.stu?'<p>Log in to see your attendance.</p>'+lock():(()=>{let a=0,b=0;if(!Object.keys(me.att).length)return`<h2>${esc(me.n)}</h2><p class="mut">No attendance added yet.</p>`;const rows=Object.keys(me.att).map(k=>{const[x,y]=me.att[k];a+=x;b+=y;const p=Math.round(x/y*100);return`<div style="margin:12px 0"><div class="row" style="justify-content:space-between"><b>${S.subjects[k].n}</b><span>${x}/${y} · ${p}% ${p<75?'<span class="chip a">Below 75%</span>':""}</span></div><div class="bartrack"><i class="${p<75?"lo":""}" style="width:${p}%"></i></div></div>`}).join("");return`<h2>${esc(me.n)}</h2><p>Overall attendance: <b>${Math.round(a/b*100)}%</b></p>`+rows})();
+ else if(U.tab==="result")c=!U.stu?'<p>Log in to see your results.</p>'+lock():(()=>{if(!Object.keys(me.res).length)return`<h2>${esc(me.n)} · ${U.stu}</h2><p class="mut">No results added yet.</p>`;let gp=0;const r=Object.keys(me.res).map(k=>{const g=grade(me.res[k]);gp+=g[1];return`<tr><td>${S.subjects[k].n}</td><td>${me.res[k]}/100</td><td><span class="chip ${g[0]==="F"?"a":"p"}">${g[0]}</span></td></tr>`}).join("");return`<h2>${esc(me.n)} · ${U.stu}</h2><div class="wrap"><table><thead><tr><th>Subject</th><th>Marks</th><th>Grade</th></tr></thead><tbody>${r}</tbody></table></div><p><b>SGPA: ${(gp/Object.keys(me.res).length).toFixed(2)}</b></p>`})();
+ else c='<h2>Academic calendar</h2>'+calendar();
+ return `<div class="row" style="justify-content:space-between"><h1 style="font-size:1.7rem">Student portal</h1>${U.stu?`<span class="chip p">Logged in: ${U.stu}</span>`:""}</div>`+tabs([["notices","Notices"],["timetable","Timetable"],["teachers","Teachers"],["attendance","Attendance"],["result","Result"],["calendar","Calendar"]])+`<div class="card">${c}</div>`}
+function teacher(){const t=tm(U.tid);if(!t)return loginForm("teacher");let c="";
+ if(U.tab==="today"){const mine=TD>5?[]:[0,1,2,3,4,5].flatMap(p=>CK.filter(x=>{const k=S.tt[x]&&S.tt[x][TD][p];return k&&S.subjects[k]&&S.subjects[k].t===t.id}).map(x=>({k:S.tt[x][TD][p],p,cl:x})));let nx=false;
+  c=`<h2>Today, ${D[TD]||"Sunday"}</h2>`+(absent(t.id)?'<div class="live"><span class="dot"></span>You are marked absent today. Your classes are flagged for students.</div>':"")+(TD===6?'<p class="mut">Sunday. No classes.</p>':mine.length?mine.map(({k,p,cl})=>{const h=NOW.getHours(),st=h>=PS[p]+1?"Done":h>=PS[p]?"Now":!nx?(nx=true,"Next"):"Later";return`<div class="notice"><b>${S.subjects[k].n}</b> <span class="chip ${st==="Now"?"p":st==="Next"?"n":"n"}">${st}</span><br><small>Period ${p+1} · ${P[p]} · ${yname(+cl[0])}, Sec ${cl[1]}</small></div>`}).join(""):'<p class="mut">No classes today.</p>')}
+ else if(U.tab==="week")c='<h2>My weekly timetable</h2>'+ttTable("teacher",t.id);
+ else if(U.tab==="notices")c=notices("teacher");
+ else if(U.tab==="absent")c='<h2>My attendance</h2>'+teacherAtt(t,false)
+ else if(U.tab==="stu")c=staffStudents();
+ else c='<h2>All teachers</h2>'+directory();
+ return `<div class="row" style="justify-content:space-between"><h1 style="font-size:1.7rem">${esc(t.name)}</h1><span class="chip n">${t.id} · ${t.room}</span></div>`+tabs([["today","Today"],["week","Week"],["notices","Notices"],["absent","Attendance"],["stu","Students"],["dir","Teachers"]])+`<div class="card">${c}</div>`}
+function staff(){if(!U.staff)return loginForm("staff");let c="";
+ if(U.tab==="timetable")c=`<div class="row" style="justify-content:space-between"><h2>Timetable editor</h2><button class="btn acc" onclick="regen()">Generate all timetables (4 years × 6 sections)</button></div><p class="mut">Changes show to students and teachers. Teachers who are off or absent cannot be assigned to that day, and a teacher cannot be in two sections at the same time.</p>`+absentBanner()+classPick()+ttTable("staff");
+ else if(U.tab==="notices")c=`<h2>Post a notice</h2><label for="nt">Title</label><input id="nt"><label for="nb">Message</label><textarea id="nb" rows="3"></textarea><label for="na">Send to</label><select id="na"><option value="all">Students and teachers</option><option value="student">Students only</option><option value="teacher">Teachers only</option></select><p><button class="btn acc" onclick="addNotice()">Post notice</button></p><h3>Posted notices</h3>`+notices("staff");
+ else if(U.tab==="teachers")c=staffTeachers();
+ else if(U.tab==="details")c=staffDetails();
+ else if(U.tab==="setup"){const tO=S.teachers.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join("");
+  c=`<h2>Setup</h2><p class="mut">Everything starts empty. Add data here. Teacher ID and password are in the Details tab. Student marks and attendance are entered by teachers, in the Students tab of the Teacher login.</p>
+  <h3>Add teacher</h3><div class="grid2"><div><label for="tn">Name</label><input id="tn"></div><div><label for="tro">Room</label><input id="tro"></div></div><p><button class="btn acc" onclick="addTeacher()">Add teacher</button></p>
+  <h3>Add subject</h3><div class="grid2"><div><label for="sn">Subject name</label><input id="sn"></div><div><label for="st">Teacher</label><select id="st">${tO}</select></div><div><label for="sy">Year</label><select id="sy"><option value="">All years</option>${YRS.map(v=>`<option value="${v}">${yname(v)}</option>`).join("")}</select></div></div><p><button class="btn acc" onclick="addSubject()">Add subject</button></p>
+  <h3>Add student</h3><div class="grid2"><div><label for="rn">Roll number</label><input id="rn"></div><div><label for="rname">Name</label><input id="rname"></div><div><label for="rpw">Password</label><input id="rpw"></div><div><label for="ry">Year</label><select id="ry">${YRS.map(v=>`<option value="${v}">${yname(v)}</option>`).join("")}</select></div><div><label for="rsec">Section</label><select id="rsec">${SEC.map(v=>`<option>${v}</option>`).join("")}</select></div></div><p><button class="btn acc" onclick="addStudent()">Add student</button></p>`}
+ else c=`<h2>Academic calendar</h2><div class="grid2"><div><label for="ed">Date</label><input id="ed" type="date"></div><div><label for="et">Title</label><input id="et"></div><div><label for="ek">Type</label><select id="ek"><option value="holiday">Holiday</option><option value="event">Event</option></select></div></div><p><button class="btn acc" onclick="addEvent()">Add to calendar</button></p>`+calendar();
+ return `<h1 style="font-size:1.7rem">Academic staff panel</h1>`+tabs([["timetable","Timetable"],["notices","Notices"],["teachers","Teachers"],["details","Details"],["calendar","Calendar"],["setup","Setup"]])+`<div class="card">${c}</div>`}
+
+/* ---------- staff actions ---------- */
+ function addTeacher(){const n=$("#tn").value.trim();if(!n){toast("Add a name");return}
+ let i=S.teachers.length+1,id;do{id="T"+String(i++).padStart(2,"0")}while(tm(id));
+ S.teachers.push({id,name:n,pw:"teacher123",room:$("#tro").value.trim(),off:[]});save();render();toast("Teacher added: "+id)}
+function addSubject(){const n=$("#sn").value.trim(),t=$("#st").value;if(!n||!t){toast("Add a subject and a teacher");return}
+ let k="S"+(Object.keys(S.subjects).length+1);while(S.subjects[k])k+="x";S.subjects[k]={n,t,y:$("#sy").value||""};save();render();toast("Subject added")}
+function addStudent(){const r=$("#rn").value.trim().toUpperCase(),n=$("#rname").value.trim(),pw=$("#rpw").value;if(!r||!n||!pw){toast("Fill roll number, name and password");return}
+ S.stu[r]={n,pw,y:+$("#ry").value,sec:$("#rsec").value,att:{},res:{}};save();render();toast("Student added")}
+function addRecord(){const s=$("#ms").value,j=$("#mj").value;if(!s||!j){toast("Add a student and a subject first");return}
+ const m=$("#mm").value,a=$("#ma").value,t=$("#mt").value,st=S.stu[s];
+ if(m!=="")st.res[j]=+m;if(a!==""&&t!=="")st.att[j]=[+a,+t];save();render();toast("Record saved")}
+function setCell(key,d,p,v){if(v&&clash(key,d,p,v)){toast("Teacher already busy in "+clash(key,d,p,v));return}S.tt[key][d][p]=v||null;save();render();toast("Timetable updated")}
+function regen(){S.tt=gen();save();render();toast("24 timetables generated (4 years × 6 sections)")}
+function addNotice(){const t=$("#nt").value.trim(),b=$("#nb").value.trim();if(!t||!b){toast("Add a title and a message");return}
+ S.notices.push({id:Date.now(),t,b,a:$("#na").value,d:TK});save();render();toast("Notice posted")}
+function delNotice(id){S.notices=S.notices.filter(n=>n.id!==id);save();render()}
+function toggleAbs(id){S.att[TK]=S.att[TK]||{};S.att[TK][id]=absent(id)?"P":"A";save();render()}
+function toggleOff(id,d){const t=tm(id);t.off=t.off.includes(d)?t.off.filter(x=>x!==d):[...t.off,d];save();render()}
+function addEvent(){const d=$("#ed").value,t=$("#et").value.trim();if(!d||!t){toast("Add a date and a title");return}
+ S.events.push({d,t,k:$("#ek").value});save();render();toast("Added to calendar")}
+function delEvent(d,t){S.events=S.events.filter(e=>!(e.d===d&&e.t.replace(/'/g,"")===t));save();render()}
+
+const IC={
+notices:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
+timetable:'<path d="M2 4h7a3 3 0 0 1 3 3v14a2 2 0 0 0-2-2H2z"/><path d="M22 4h-7a3 3 0 0 0-3 3v14a2 2 0 0 1 2-2h8z"/>',
+teachers:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+attendance:'<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
+result:'<path d="M5 21V10M12 21V4M19 21v-8"/>',
+calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/>',
+today:'<path d="M3 11 12 3l9 8"/><path d="M5 10v11h14V10"/>',
+week:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M8 14h2M14 14h2M8 18h2"/>',
+absent:'<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
+stu:'<path d="m2 9 10-5 10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5"/>',
+dir:'<circle cx="9" cy="8" r="3.5"/><path d="M2 20a7 7 0 0 1 14 0"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14a5 5 0 0 1 5 5"/>',
+details:'<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M16 7l3 3M14 9l2 2"/>',
+setup:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+home:'<path d="M3 11 12 3l9 8"/><path d="M5 10v11h14V10"/>',
+out:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>'};
+const ico=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${IC[k]||IC.dir}</svg>`;
+const CREST='<svg viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="38" fill="#e9eefc" stroke="#9db6ff" stroke-width="2"/><circle cx="40" cy="40" r="30" fill="none" stroke="#1b2f7a" stroke-width="1.5"/><circle cx="40" cy="40" r="22" fill="#1b2f7a"/><path d="m40 22 4 10h10l-8 6 3 10-9-6-9 6 3-10-8-6h10z" fill="#ffc400"/></svg>';
+function sidebar(){const v=U.view,logged=U.tid||U.stu||U.staff;
+ const nb=k=>{if(k!=="notices")return"";const a=v==="staff"?"staff":v;const n=S.notices.filter(x=>a==="staff"||x.a==="all"||x.a===a).length;return n?`<span class="bd">${n}</span>`:""};
+ return `<div class="scrim ${U.nav?"open":""}" onclick="navT()"></div><aside class="side ${U.nav?"open":""}" aria-label="Main menu"><div class="side-in">
+ <div class="sb-brand" onclick="go('home')" role="link" tabindex="0">${CREST}<b>GEC</b><span>Campus Portal</span></div><div class="sb-line"></div>
+ <nav class="nav">${SIDE.map(([k,t])=>`<button class="nv ${U.tab===k?"on":""}" onclick="tab('${k}')" ${U.tab===k?'aria-current="page"':""}>${ico(k)}<span>${t}</span>${nb(k)}</button>`).join("")}</nav>
+ <div class="sb-line"></div>
+ <div class="sb-act"><button class="btn sm" onclick="go('home')">Home</button>${logged?'<button class="btn sm" onclick="logout()">Log out</button>':""}</div>
+ <div class="sb-foot"><svg viewBox="0 0 24 24"><path d="m2 9 10-5 10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5"/></svg><div>Learn · Grow · Excel</div><small>GEC Bhubaneswar</small></div>
+ </div></aside>`}
+function render(){const v=U.view;SIDE=[];
+ const body=v==="home"?home():v==="login"?`<h1 style="font-size:1.7rem">${U.role==="staff"?"Academic staff":"Teacher"} login</h1>`+loginForm(U.role):v==="student"?student():v==="teacher"?teacher():staff();
+ let h;
+ if(SIDE.length){h=`<div class="shell">${sidebar()}<div class="content"><div class="mbar"><button class="hb" onclick="navT()" aria-label="Open menu"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><span class="brand" onclick="go('home')">GEC <span>Campus Portal</span></span></div><main>${body}</main></div></div>`}
+ else{h=`<div class="bar"><div><span class="brand" onclick="go('home')" role="link" tabindex="0">GEC <span>Campus Portal</span></span><span class="row">${v!=="home"?'<button class="btn sm" onclick="go(\'home\')">Home</button>':""}${(U.tid||U.stu||U.staff)?'<button class="btn sm" onclick="logout()">Log out</button>':""}</span></div></div><main>${body}</main>`}
+ $("#app").innerHTML=h;const f=document.querySelector("[data-af]");if(f)f.focus()}
+render();
+</script></body></html>

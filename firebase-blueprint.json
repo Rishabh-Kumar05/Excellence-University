@@ -1,0 +1,286 @@
+{
+  "entities": {
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Authorized university administrator marker keyed by Firebase Auth UID.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "minLength": 3, "maxLength": 160 },
+        "role": { "type": "string", "enum": ["admin"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role", "createdAt"]
+    },
+    "UserPublicProfile": {
+      "title": "UserPublicProfile",
+      "description": "Non-PII public profile for an authenticated scholar.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "displayName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "major": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "displayName", "createdAt"]
+    },
+    "UserPrivateInfo": {
+      "title": "UserPrivateInfo",
+      "description": "Private PII contact record isolated to the profile owner and admin.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "minLength": 3, "maxLength": 160 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "LoginLog": {
+      "title": "LoginLog",
+      "description": "Authentication activity log capturing sign-ins and account creations for admin review.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "minLength": 3, "maxLength": 160 },
+        "displayName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "role": { "type": "string", "enum": ["admin", "scholar"] },
+        "provider": { "type": "string", "minLength": 2, "maxLength": 60 },
+        "emailVerified": { "type": "boolean" },
+        "eventType": { "type": "string", "enum": ["Sign In", "Sign Up", "Session Restored"] },
+        "userAgent": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "lastSignInTime": { "type": "string", "maxLength": 80 },
+        "accountCreatedAt": { "type": "string", "maxLength": 80 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "displayName", "role", "provider", "emailVerified", "eventType", "userAgent", "createdAt"]
+    },
+    "CustomTeacher": {
+      "title": "CustomTeacher",
+      "description": "Faculty profile added or updated by the administrator for the directory and timetable scheduling.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "numericId": { "type": "number" },
+        "name": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "title": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "department": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "email": { "type": "string", "minLength": 3, "maxLength": 160 },
+        "office_room": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "office_hours": { "type": "string", "minLength": 2, "maxLength": 100 },
+        "specialization": { "type": "string", "minLength": 2, "maxLength": 160 },
+        "assigned_course": { "type": "string", "maxLength": 120 },
+        "publications_count": { "type": "number" },
+        "bio": { "type": "string", "minLength": 2, "maxLength": 600 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "numericId", "name", "title", "department", "email", "office_room", "office_hours", "specialization", "publications_count", "bio", "createdAt", "updatedAt"]
+    },
+    "TeacherAttendanceRecord": {
+      "title": "TeacherAttendanceRecord",
+      "description": "Daily faculty attendance marked by the administrator and viewable in the Teacher Portal calendar.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "teacherId": { "type": "number" },
+        "teacherName": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "department": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "date": { "type": "string", "minLength": 8, "maxLength": 20 },
+        "status": { "type": "string", "enum": ["Present", "Absent", "Late", "On Leave"] },
+        "notes": { "type": "string", "maxLength": 400 },
+        "markedBy": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "teacherId", "teacherName", "department", "date", "status", "notes", "markedBy", "createdAt", "updatedAt"]
+    },
+    "SavedTimetable": {
+      "title": "SavedTimetable",
+      "description": "Conflict-free college timetable generated and saved by the administrator.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "minLength": 2, "maxLength": 160 },
+        "teachersCount": { "type": "number" },
+        "sectionsCount": { "type": "number" },
+        "roomsCount": { "type": "number" },
+        "daysCount": { "type": "number" },
+        "groups": { "type": "array" },
+        "slots": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "title", "teachersCount", "sectionsCount", "roomsCount", "daysCount", "groups", "slots", "createdAt"]
+    },
+    "StudentResult": {
+      "title": "StudentResult",
+      "description": "Academic examination result for a student searchable by student name in the Student Portal.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "studentCode": { "type": "string", "minLength": 2, "maxLength": 40 },
+        "studentName": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "courseName": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "subjectName": { "type": "string", "minLength": 2, "maxLength": 160 },
+        "marks": { "type": "number" },
+        "maxMarks": { "type": "number" },
+        "grade": { "type": "string", "minLength": 1, "maxLength": 8 },
+        "semester": { "type": "string", "minLength": 2, "maxLength": 40 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "studentCode", "studentName", "courseName", "subjectName", "marks", "maxMarks", "grade", "semester", "createdAt", "updatedAt"]
+    },
+    "CollegeNotice": {
+      "title": "CollegeNotice",
+      "description": "Official university notice or announcement published by the administrator for students, teachers, or both.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "minLength": 2, "maxLength": 180 },
+        "category": { "type": "string", "enum": ["General", "Academic", "Examination", "Urgent", "Event"] },
+        "audience": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "body": { "type": "string", "minLength": 2, "maxLength": 2000 },
+        "publishedBy": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "isPinned": { "type": "boolean" },
+        "isActive": { "type": "boolean" },
+        "expiresAt": { "type": "string", "maxLength": 20 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "title", "category", "audience", "body", "publishedBy", "isPinned", "isActive", "createdAt", "updatedAt"]
+    },
+    "Enrollment": {
+      "title": "Enrollment",
+      "description": "Course enrollment record owned by a signed-in scholar.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "courseId": { "type": "number" },
+        "code": { "type": "string", "minLength": 2, "maxLength": 24 },
+        "title": { "type": "string", "minLength": 2, "maxLength": 160 },
+        "department": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "instructor": { "type": "string", "minLength": 2, "maxLength": 100 },
+        "duration": { "type": "string", "minLength": 2, "maxLength": 40 },
+        "credits": { "type": "number" },
+        "schedule": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "courseId", "code", "title", "department", "instructor", "duration", "credits", "schedule", "createdAt"]
+    },
+    "StudentHonorRecord": {
+      "title": "StudentHonorRecord",
+      "description": "Public-safe student record without PII (name, ID number, course name).",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "student_code": { "type": "string", "minLength": 2, "maxLength": 32 },
+        "name": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "major": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "year_level": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "gpa": { "type": "number" },
+        "honors": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "club_name": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "student_code", "name", "major", "year_level", "gpa", "honors", "club_name", "createdAt"]
+    },
+    "CalendarEvent": {
+      "title": "CalendarEvent",
+      "description": "Academic calendar holiday, notice, or university event.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "minLength": 2, "maxLength": 160 },
+        "category": { "type": "string", "enum": ["Academic", "Exam", "Holiday", "Deadline", "Notice"] },
+        "event_date": { "type": "string", "minLength": 8, "maxLength": 20 },
+        "end_date": { "type": "string", "maxLength": 20 },
+        "location": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "semester": { "type": "string", "minLength": 2, "maxLength": 40 },
+        "description": { "type": "string", "minLength": 2, "maxLength": 600 },
+        "is_custom": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "title", "category", "event_date", "location", "semester", "description", "is_custom", "createdAt"]
+    },
+    "CustomCourse": {
+      "title": "CustomCourse",
+      "description": "Course entry in catalog and timetable setup.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "numericId": { "type": "number" },
+        "code": { "type": "string", "minLength": 2, "maxLength": 24 },
+        "title": { "type": "string", "minLength": 2, "maxLength": 160 },
+        "department": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "duration": { "type": "string", "minLength": 2, "maxLength": 40 },
+        "rating": { "type": "number" },
+        "review_count": { "type": "number" },
+        "instructor": { "type": "string", "minLength": 2, "maxLength": 100 },
+        "description": { "type": "string", "minLength": 2, "maxLength": 600 },
+        "image_key": { "type": "string", "enum": ["cs", "architecture", "economics"] },
+        "credits": { "type": "number" },
+        "seats_total": { "type": "number" },
+        "seats_taken": { "type": "number" },
+        "schedule": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "syllabus": { "type": "string", "minLength": 2, "maxLength": 1000 },
+        "featured": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "numericId", "code", "title", "department", "duration", "rating", "review_count", "instructor", "description", "image_key", "credits", "seats_total", "seats_taken", "schedule", "syllabus", "featured", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/AdminRecord" },
+      "description": "Authorized university administrators."
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserPublicProfile" },
+      "description": "Public-safe user profile documents keyed by Firebase Auth UID."
+    },
+    "/users/{userId}/private/{docId}": {
+      "schema": { "$ref": "#/entities/UserPrivateInfo" },
+      "description": "Owner-only and admin-readable private contact PII subcollection."
+    },
+    "/login_logs/{logId}": {
+      "schema": { "$ref": "#/entities/LoginLog" },
+      "description": "Authentication activity logs viewable exclusively by the administrator."
+    },
+    "/custom_teachers/{teacherId}": {
+      "schema": { "$ref": "#/entities/CustomTeacher" },
+      "description": "Faculty profiles added or updated by the administrator."
+    },
+    "/teacher_attendance/{recordId}": {
+      "schema": { "$ref": "#/entities/TeacherAttendanceRecord" },
+      "description": "Faculty attendance records managed by the administrator and viewable in the Teacher Portal calendar."
+    },
+    "/timetables/{timetableId}": {
+      "schema": { "$ref": "#/entities/SavedTimetable" },
+      "description": "Conflict-free generated timetables saved by the administrator."
+    },
+    "/student_results/{resultId}": {
+      "schema": { "$ref": "#/entities/StudentResult" },
+      "description": "Student examination results managed by the administrator and searchable by student name."
+    },
+    "/college_notices/{noticeId}": {
+      "schema": { "$ref": "#/entities/CollegeNotice" },
+      "description": "Official college notices published and managed by the administrator."
+    },
+    "/enrollments/{enrollmentId}": {
+      "schema": { "$ref": "#/entities/Enrollment" },
+      "description": "Scholar course enrollments scoped to owner UID."
+    },
+    "/students/{studentId}": {
+      "schema": { "$ref": "#/entities/StudentHonorRecord" },
+      "description": "Registered student records (name, ID number, course name)."
+    },
+    "/calendar_events/{eventId}": {
+      "schema": { "$ref": "#/entities/CalendarEvent" },
+      "description": "Academic calendar holidays, notices, and university events."
+    },
+    "/custom_courses/{courseId}": {
+      "schema": { "$ref": "#/entities/CustomCourse" },
+      "description": "Published courses stored in Firestore."
+    }
+  }
+}

@@ -1,0 +1,384 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Boot connection check document
+    match /test/connection {
+      allow get: if true;
+    }
+
+    // Shared validation primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        request.auth.token.email == 'hey.demouser2026@gmail.com'
+      );
+    }
+
+    // Entity validators
+    function isValidAdminRecord(data) {
+      return data.keys().hasAll(['uid', 'email', 'role', 'createdAt'])
+        && data.keys().hasOnly(['uid', 'email', 'role', 'createdAt'])
+        && data.uid is string && data.uid == request.auth.uid && data.uid.size() >= 1 && data.uid.size() <= 128
+        && data.email is string && data.email == 'hey.demouser2026@gmail.com' && data.email.size() <= 160
+        && data.role is string && data.role == 'admin'
+        && data.createdAt is timestamp;
+    }
+
+    function isValidUserPublic(data) {
+      return data.keys().hasAll(['uid', 'displayName', 'createdAt'])
+        && data.keys().hasOnly(['uid', 'displayName', 'major', 'createdAt'])
+        && data.uid is string && data.uid == request.auth.uid && data.uid.size() >= 1 && data.uid.size() <= 128
+        && data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 120
+        && (!('major' in data) || (data.major is string && data.major.size() >= 1 && data.major.size() <= 80))
+        && data.createdAt is timestamp;
+    }
+
+    function isValidUserPrivate(data) {
+      return data.keys().hasAll(['uid', 'email', 'createdAt'])
+        && data.keys().hasOnly(['uid', 'email', 'createdAt'])
+        && data.uid is string && data.uid == request.auth.uid && data.uid.size() >= 1 && data.uid.size() <= 128
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 160
+        && data.createdAt is timestamp;
+    }
+
+    function isValidLoginLog(data) {
+      return data.keys().hasAll(['uid', 'email', 'displayName', 'role', 'provider', 'emailVerified', 'eventType', 'userAgent', 'createdAt'])
+        && data.keys().hasOnly(['uid', 'email', 'displayName', 'role', 'provider', 'emailVerified', 'eventType', 'userAgent', 'lastSignInTime', 'accountCreatedAt', 'createdAt'])
+        && data.uid is string && data.uid == request.auth.uid && data.uid.size() >= 1 && data.uid.size() <= 128
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 160
+        && data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 120
+        && data.role is string && (data.role == 'scholar' || (data.role == 'admin' && request.auth.token.email == 'hey.demouser2026@gmail.com'))
+        && data.provider is string && data.provider.size() >= 2 && data.provider.size() <= 60
+        && data.emailVerified is bool
+        && data.eventType is string && data.eventType in ['Sign In', 'Sign Up', 'Session Restored']
+        && data.userAgent is string && data.userAgent.size() >= 1 && data.userAgent.size() <= 240
+        && (!('lastSignInTime' in data) || data.lastSignInTime == null || (data.lastSignInTime is string && data.lastSignInTime.size() <= 80))
+        && (!('accountCreatedAt' in data) || data.accountCreatedAt == null || (data.accountCreatedAt is string && data.accountCreatedAt.size() <= 80))
+        && data.createdAt is timestamp;
+    }
+
+    function isValidCustomTeacher(data) {
+      return data.keys().hasAll(['uid', 'numericId', 'name', 'title', 'department', 'email', 'office_room', 'office_hours', 'specialization', 'publications_count', 'bio', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['uid', 'numericId', 'name', 'title', 'department', 'email', 'office_room', 'office_hours', 'specialization', 'assigned_course', 'publications_count', 'bio', 'createdAt', 'updatedAt'])
+        && data.uid is string && data.uid.size() >= 1 && data.uid.size() <= 128
+        && data.numericId is number && data.numericId >= 1
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 120
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 120
+        && data.department is string && data.department.size() >= 1 && data.department.size() <= 80
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 160
+        && data.office_room is string && data.office_room.size() >= 1 && data.office_room.size() <= 80
+        && data.office_hours is string && data.office_hours.size() >= 1 && data.office_hours.size() <= 100
+        && data.specialization is string && data.specialization.size() >= 1 && data.specialization.size() <= 160
+        && (!('assigned_course' in data) || data.assigned_course == null || (data.assigned_course is string && data.assigned_course.size() <= 120))
+        && data.publications_count is number && data.publications_count >= 0 && data.publications_count <= 2000
+        && data.bio is string && data.bio.size() >= 1 && data.bio.size() <= 600
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidTeacherAttendanceRecord(data) {
+      return data.keys().hasAll(['uid', 'teacherId', 'teacherName', 'department', 'date', 'status', 'notes', 'markedBy', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['uid', 'teacherId', 'teacherName', 'department', 'date', 'status', 'notes', 'markedBy', 'createdAt', 'updatedAt'])
+        && data.uid is string && data.uid == request.auth.uid && data.uid.size() >= 1 && data.uid.size() <= 128
+        && data.teacherId is number && data.teacherId >= 1
+        && data.teacherName is string && data.teacherName.size() >= 2 && data.teacherName.size() <= 120
+        && data.department is string && data.department.size() >= 2 && data.department.size() <= 80
+        && data.date is string && data.date.size() >= 8 && data.date.size() <= 20
+        && data.status is string && data.status in ['Present', 'Absent', 'Late', 'On Leave']
+        && data.notes is string && data.notes.size() <= 400
+        && data.markedBy is string && data.markedBy.size() >= 2 && data.markedBy.size() <= 120
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidSavedTimetable(data) {
+      return data.keys().hasAll(['uid', 'title', 'teachersCount', 'sectionsCount', 'roomsCount', 'daysCount', 'groups', 'slots', 'createdAt'])
+        && data.keys().hasOnly(['uid', 'title', 'teachersCount', 'sectionsCount', 'roomsCount', 'daysCount', 'groups', 'slots', 'createdAt'])
+        && data.uid is string && data.uid == request.auth.uid && data.uid.size() >= 1 && data.uid.size() <= 128
+        && data.title is string && data.title.size() >= 2 && data.title.size() <= 160
+        && data.teachersCount is number && data.teachersCount >= 1 && data.teachersCount <= 300
+        && data.sectionsCount is number && data.sectionsCount >= 1 && data.sectionsCount <= 100
+        && data.roomsCount is number && data.roomsCount >= 1 && data.roomsCount <= 300
+        && data.daysCount is number && data.daysCount >= 1 && data.daysCount <= 7
+        && data.groups is list && data.groups.size() >= 1 && data.groups.size() <= 100 && data.groups[0] is number
+        && data.slots is list && data.slots.size() >= 1 && data.slots.size() <= 4500 && data.slots[0] is map
+        && data.createdAt is timestamp;
+    }
+
+    function isValidStudentResult(data) {
+      return data.keys().hasAll(['uid', 'studentCode', 'studentName', 'courseName', 'subjectName', 'marks', 'maxMarks', 'grade', 'semester', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['uid', 'studentCode', 'studentName', 'courseName', 'subjectName', 'marks', 'maxMarks', 'grade', 'semester', 'createdAt', 'updatedAt'])
+        && data.uid is string && data.uid == request.auth.uid && data.uid.size() >= 1 && data.uid.size() <= 128
+        && data.studentCode is string && data.studentCode.size() >= 2 && data.studentCode.size() <= 40
+        && data.studentName is string && data.studentName.size() >= 2 && data.studentName.size() <= 120
+        && data.courseName is string && data.courseName.size() >= 2 && data.courseName.size() <= 120
+        && data.subjectName is string && data.subjectName.size() >= 2 && data.subjectName.size() <= 160
+        && data.marks is number && data.marks >= 0 && data.marks <= 1000
+        && data.maxMarks is number && data.maxMarks >= 1 && data.maxMarks <= 1000
+        && data.grade is string && data.grade.size() >= 1 && data.grade.size() <= 8
+        && data.semester is string && data.semester.size() >= 2 && data.semester.size() <= 40
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidCollegeNotice(data) {
+      return data.keys().hasAll(['uid', 'title', 'category', 'audience', 'body', 'publishedBy', 'isPinned', 'isActive', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['uid', 'title', 'category', 'audience', 'body', 'publishedBy', 'isPinned', 'isActive', 'expiresAt', 'createdAt', 'updatedAt'])
+        && data.uid is string && data.uid == request.auth.uid && data.uid.size() >= 1 && data.uid.size() <= 128
+        && data.title is string && data.title.size() >= 2 && data.title.size() <= 180
+        && data.category is string && data.category in ['General', 'Academic', 'Examination', 'Urgent', 'Event']
+        && data.audience is string && data.audience.size() >= 2 && data.audience.size() <= 80
+        && data.body is string && data.body.size() >= 2 && data.body.size() <= 2000
+        && data.publishedBy is string && data.publishedBy.size() >= 2 && data.publishedBy.size() <= 120
+        && data.isPinned is bool
+        && data.isActive is bool
+        && (!('expiresAt' in data) || data.expiresAt == null || (data.expiresAt is string && data.expiresAt.size() <= 20))
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidEnrollment(data) {
+      return data.keys().hasAll(['uid', 'courseId', 'code', 'title', 'department', 'instructor', 'duration', 'credits', 'schedule', 'createdAt'])
+        && data.keys().hasOnly(['uid', 'courseId', 'code', 'title', 'department', 'instructor', 'duration', 'credits', 'schedule', 'createdAt'])
+        && data.uid is string && data.uid == request.auth.uid && data.uid.size() >= 1 && data.uid.size() <= 128
+        && data.courseId is number && data.courseId >= 1
+        && data.code is string && data.code.size() >= 2 && data.code.size() <= 24
+        && data.title is string && data.title.size() >= 2 && data.title.size() <= 160
+        && data.department is string && data.department.size() >= 2 && data.department.size() <= 80
+        && data.instructor is string && data.instructor.size() >= 2 && data.instructor.size() <= 100
+        && data.duration is string && data.duration.size() >= 2 && data.duration.size() <= 40
+        && data.credits is number && data.credits >= 1 && data.credits <= 12
+        && data.schedule is string && data.schedule.size() >= 2 && data.schedule.size() <= 120
+        && data.createdAt is timestamp;
+    }
+
+    function isValidStudentHonorRecord(data) {
+      return data.keys().hasAll(['uid', 'student_code', 'name', 'major', 'year_level', 'gpa', 'honors', 'club_name', 'createdAt'])
+        && data.keys().hasOnly(['uid', 'student_code', 'name', 'major', 'year_level', 'gpa', 'honors', 'club_name', 'createdAt'])
+        && data.uid is string && data.uid == request.auth.uid && data.uid.size() >= 1 && data.uid.size() <= 128
+        && data.student_code is string && data.student_code.size() >= 2 && data.student_code.size() <= 32
+        && data.name is string && data.name.size() >= 2 && data.name.size() <= 120
+        && data.major is string && data.major.size() >= 2 && data.major.size() <= 80
+        && data.year_level is string && data.year_level.size() >= 2 && data.year_level.size() <= 80
+        && data.gpa is number && data.gpa >= 0 && data.gpa <= 4.0
+        && data.honors is string && data.honors.size() >= 2 && data.honors.size() <= 120
+        && data.club_name is string && data.club_name.size() >= 2 && data.club_name.size() <= 120
+        && data.createdAt is timestamp;
+    }
+
+    function isValidCalendarEvent(data) {
+      return data.keys().hasAll(['uid', 'title', 'category', 'event_date', 'location', 'semester', 'description', 'is_custom', 'createdAt'])
+        && data.keys().hasOnly(['uid', 'title', 'category', 'event_date', 'end_date', 'location', 'semester', 'description', 'is_custom', 'createdAt'])
+        && data.uid is string && data.uid == request.auth.uid && data.uid.size() >= 1 && data.uid.size() <= 128
+        && data.title is string && data.title.size() >= 2 && data.title.size() <= 160
+        && data.category is string && data.category in ['Academic', 'Exam', 'Holiday', 'Deadline', 'Notice']
+        && data.event_date is string && data.event_date.size() >= 8 && data.event_date.size() <= 20
+        && (!('end_date' in data) || data.end_date == null || (data.end_date is string && data.end_date.size() <= 20))
+        && data.location is string && data.location.size() >= 2 && data.location.size() <= 120
+        && data.semester is string && data.semester.size() >= 2 && data.semester.size() <= 40
+        && data.description is string && data.description.size() >= 2 && data.description.size() <= 600
+        && data.is_custom is number && data.is_custom == 1
+        && data.createdAt is timestamp;
+    }
+
+    function isValidCustomCourse(data) {
+      return data.keys().hasAll(['uid', 'numericId', 'code', 'title', 'department', 'duration', 'rating', 'review_count', 'instructor', 'description', 'image_key', 'credits', 'seats_total', 'seats_taken', 'schedule', 'syllabus', 'featured', 'createdAt'])
+        && data.keys().hasOnly(['uid', 'numericId', 'code', 'title', 'department', 'duration', 'rating', 'review_count', 'instructor', 'description', 'image_key', 'credits', 'seats_total', 'seats_taken', 'schedule', 'syllabus', 'featured', 'createdAt'])
+        && data.uid is string && data.uid == request.auth.uid && data.uid.size() >= 1 && data.uid.size() <= 128
+        && data.numericId is number && data.numericId >= 100
+        && data.code is string && data.code.size() >= 2 && data.code.size() <= 24
+        && data.title is string && data.title.size() >= 2 && data.title.size() <= 160
+        && data.department is string && data.department.size() >= 2 && data.department.size() <= 80
+        && data.duration is string && data.duration.size() >= 2 && data.duration.size() <= 40
+        && data.rating is number && data.rating >= 0 && data.rating <= 5
+        && data.review_count is number && data.review_count >= 0
+        && data.instructor is string && data.instructor.size() >= 2 && data.instructor.size() <= 100
+        && data.description is string && data.description.size() >= 2 && data.description.size() <= 600
+        && data.image_key is string && data.image_key in ['cs', 'architecture', 'economics']
+        && data.credits is number && data.credits >= 1 && data.credits <= 12
+        && data.seats_total is number && data.seats_total >= 1 && data.seats_total <= 500
+        && data.seats_taken is number && data.seats_taken == 0
+        && data.schedule is string && data.schedule.size() >= 2 && data.schedule.size() <= 120
+        && data.syllabus is string && data.syllabus.size() >= 2 && data.syllabus.size() <= 1000
+        && data.featured is number && data.featured == 0
+        && data.createdAt is timestamp;
+    }
+
+    // 0. Admin Bootstrapping Registry
+    match /admins/{adminId} {
+      allow get: if isValidId(adminId) && (isOwner(adminId) || isAdmin());
+      allow create: if isValidId(adminId) && isOwner(adminId)
+        && request.auth.token.email == 'hey.demouser2026@gmail.com'
+        && isValidAdminRecord(incoming())
+        && incoming().createdAt == request.time;
+    }
+
+    // 1. User Profiles
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isValidId(userId) && isOwner(userId) && isValidUserPublic(incoming())
+        && incoming().createdAt == request.time;
+      allow update: if isValidId(userId) && isOwner(userId) && isValidUserPublic(incoming())
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'major']);
+
+      match /private/{docId} {
+        allow get: if isValidId(userId) && isValidId(docId) && (isOwner(userId) || isAdmin());
+        allow list: if isAdmin() || (isOwner(userId) && resource.data.uid == request.auth.uid);
+        allow create: if isValidId(userId) && isValidId(docId) && isOwner(userId)
+          && isValidUserPrivate(incoming()) && incoming().createdAt == request.time;
+        allow update: if isValidId(userId) && isValidId(docId) && isOwner(userId)
+          && isValidUserPrivate(incoming())
+          && incoming().uid == existing().uid
+          && incoming().createdAt == existing().createdAt
+          && incoming().diff(existing()).affectedKeys().hasOnly(['email']);
+      }
+    }
+
+    // 2. Login Activity Logs (Self-create on login, Admin-only read)
+    match /login_logs/{logId} {
+      allow get: if isValidId(logId) && isAdmin();
+      allow list: if isAdmin();
+      allow create: if isValidId(logId) && isSignedIn() && isValidLoginLog(incoming())
+        && incoming().createdAt == request.time;
+    }
+
+    // 3. Custom Faculty Profiles (Public read, Admin-only create/update/delete)
+    match /custom_teachers/{teacherId} {
+      allow get: if isValidId(teacherId);
+      allow list: if true;
+      allow create: if isValidId(teacherId) && isAdmin() && isValidCustomTeacher(incoming())
+        && incoming().uid == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(teacherId) && isAdmin() && isValidCustomTeacher(incoming())
+        && incoming().uid == existing().uid
+        && incoming().numericId == existing().numericId
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'title', 'department', 'email', 'office_room', 'office_hours', 'specialization', 'assigned_course', 'publications_count', 'bio', 'updatedAt']);
+      allow delete: if isValidId(teacherId) && isAdmin();
+    }
+
+    // 4. Teacher Attendance Records (Non-PII work presence; teachers & students read, Admin-only write)
+    match /teacher_attendance/{recordId} {
+      allow get: if isValidId(recordId);
+      allow list: if resource.data.teacherId >= 1;
+      allow create: if isValidId(recordId) && isAdmin() && isValidTeacherAttendanceRecord(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(recordId) && isAdmin() && isValidTeacherAttendanceRecord(incoming())
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'notes', 'markedBy', 'updatedAt']);
+      allow delete: if isValidId(recordId) && isAdmin();
+    }
+
+    // 5. Generated Timetables (Public/Student/Teacher read, Admin-only create/update/delete)
+    match /timetables/{timetableId} {
+      allow get: if isValidId(timetableId);
+      allow list: if true;
+      allow create: if isValidId(timetableId) && isAdmin() && isValidSavedTimetable(incoming())
+        && incoming().createdAt == request.time;
+      allow update: if isValidId(timetableId) && isAdmin() && isValidSavedTimetable(incoming())
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['title', 'teachersCount', 'sectionsCount', 'roomsCount', 'daysCount', 'groups', 'slots']);
+      allow delete: if isValidId(timetableId) && isAdmin();
+    }
+
+    // 6. Student Results (Public non-PII academic lookup by name, Admin-only write)
+    match /student_results/{resultId} {
+      allow get: if isValidId(resultId);
+      allow list: if true;
+      allow create: if isValidId(resultId) && isAdmin() && isValidStudentResult(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(resultId) && isAdmin() && isValidStudentResult(incoming())
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['studentCode', 'studentName', 'courseName', 'subjectName', 'marks', 'maxMarks', 'grade', 'semester', 'updatedAt']);
+      allow delete: if isValidId(resultId) && isAdmin();
+    }
+
+    // 7. College Notices (Public read for students & teachers, Admin-only publish/edit/delete)
+    match /college_notices/{noticeId} {
+      allow get: if isValidId(noticeId);
+      allow list: if true;
+      allow create: if isValidId(noticeId) && isAdmin() && isValidCollegeNotice(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(noticeId) && isAdmin() && isValidCollegeNotice(incoming())
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['title', 'category', 'audience', 'body', 'isPinned', 'isActive', 'expiresAt', 'updatedAt']);
+      allow delete: if isValidId(noticeId) && isAdmin();
+    }
+
+    // 8. Enrollments (Owner-scoped + Admin inspectable)
+    match /enrollments/{enrollmentId} {
+      allow get: if isValidId(enrollmentId) && (isAdmin() || (isSignedIn() && existing().uid == request.auth.uid));
+      allow list: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow create: if isValidId(enrollmentId) && isSignedIn() && isValidEnrollment(incoming())
+        && incoming().createdAt == request.time;
+      allow delete: if isValidId(enrollmentId) && isSignedIn() && existing().uid == request.auth.uid;
+    }
+
+    // 9. Public Student Registry (Non-PII: name, ID number, course name)
+    match /students/{studentId} {
+      allow get: if isValidId(studentId);
+      allow list: if true;
+      allow create: if isValidId(studentId) && isSignedIn() && isValidStudentHonorRecord(incoming())
+        && incoming().createdAt == request.time;
+      allow delete: if isValidId(studentId) && (isAdmin() || (isSignedIn() && existing().uid == request.auth.uid));
+    }
+
+    // 10. Custom Calendar Milestones, Notices & Holidays
+    match /calendar_events/{eventId} {
+      allow get: if isValidId(eventId);
+      allow list: if true;
+      allow create: if isValidId(eventId) && isAdmin() && isValidCalendarEvent(incoming())
+        && incoming().createdAt == request.time;
+      allow delete: if isValidId(eventId) && isAdmin();
+    }
+
+    // 11. Custom Published Courses
+    match /custom_courses/{courseId} {
+      allow get: if isValidId(courseId);
+      allow list: if true;
+      allow create: if isValidId(courseId) && isSignedIn() && isValidCustomCourse(incoming())
+        && incoming().createdAt == request.time;
+      allow delete: if isValidId(courseId) && (isAdmin() || (isSignedIn() && existing().uid == request.auth.uid));
+    }
+  }
+}

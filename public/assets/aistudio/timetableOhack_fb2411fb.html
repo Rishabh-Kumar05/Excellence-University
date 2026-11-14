@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Timetable Generator</title>
+<style>
+  /* ---------- Theme tokens: blue / white ---------- */
+  :root { --bg:#fff; --panel:#f4f8ff; --line:#d6e2f5; --ink:#12233f; --muted:#5b6b86;
+    --blue:#1f5fd6; --blue-dark:#174aa8; --ok:#12805c; --bad:#c62f2f; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); line-height:1.5;
+    font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif; }
+  header { padding:28px 24px 8px; max-width:1100px; margin:0 auto; }
+  header h1 { margin:0; font-size:1.7rem; color:var(--blue); }
+  header p { margin:4px 0 0; color:var(--muted); }
+  main { max-width:1100px; margin:0 auto; padding:16px 24px 48px; display:grid; gap:20px; }
+  section { border:1px solid var(--line); border-radius:12px; padding:20px; background:var(--bg); }
+  h2 { margin:0 0 12px; font-size:1.1rem; }
+  h3 { margin:18px 0 8px; font-size:.95rem; }
+
+  /* ---------- Form ---------- */
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; }
+  label { display:block; font-size:.85rem; font-weight:600; color:var(--muted); }
+  input, select { width:100%; margin-top:4px; padding:9px 10px; font-size:1rem; color:var(--ink);
+    border:1px solid var(--line); border-radius:8px; background:var(--panel); }
+  input:focus, select:focus, button:focus-visible { outline:2px solid var(--blue); outline-offset:1px; }
+  input[readonly] { color:var(--muted); cursor:not-allowed; }
+  button { margin-top:16px; padding:10px 20px; font-size:1rem; font-weight:600; border:0;
+    border-radius:8px; background:var(--blue); color:#fff; cursor:pointer; }
+  button:hover { background:var(--blue-dark); }
+  button.ghost { background:var(--panel); color:var(--blue); border:1px solid var(--line); margin-left:8px; }
+  button.ghost:hover { background:#e6efff; }
+  .secRow { display:grid; grid-template-columns:110px 1fr 1fr; gap:12px; align-items:end;
+    padding:8px 0; border-bottom:1px solid var(--line); }
+  .secRow:last-child { border-bottom:0; }
+  .secBox { max-height:340px; overflow-y:auto; padding-right:6px; }
+  .secRow b { padding-bottom:10px; color:var(--blue); }
+
+  /* ---------- Messages ---------- */
+  .msg { margin-top:14px; padding:12px 14px; border-radius:8px; font-size:.95rem; }
+  .msg.error { background:#fdecec; color:var(--bad); border:1px solid #f3bcbc; }
+  .msg.ok { background:#e8f6f0; color:var(--ok); border:1px solid #b5e2d0; }
+  .msg ul { margin:6px 0 0 18px; padding:0; }
+
+  /* ---------- Timetable ---------- */
+  .wrap { overflow-x:auto; margin-top:12px; }
+  table { border-collapse:collapse; width:100%; min-width:640px; }
+  th, td { border:1px solid var(--line); padding:8px; text-align:center; font-size:.88rem; }
+  thead th { background:var(--blue); color:#fff; font-weight:600; }
+  tbody th { background:var(--panel); color:var(--blue); white-space:nowrap; }
+  td .course { font-weight:600; }
+  .meta { color:var(--muted); font-size:.78rem; }
+  .row { display:flex; flex-wrap:wrap; align-items:end; gap:12px; }
+  .row label { min-width:260px; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; }
+  .chip { background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:3px 12px; font-size:.85rem; }
+  .stats { display:flex; flex-wrap:wrap; gap:12px; }
+  .stat { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:8px 14px; font-size:.9rem; }
+  .stat b { color:var(--blue); }
+  details { margin-top:16px; } summary { cursor:pointer; font-weight:600; color:var(--blue); margin-bottom:8px; }
+  .hidden { display:none; }
+  @media (max-width:560px) { .secRow { grid-template-columns:1fr 1fr; } .secRow b { grid-column:1/-1; padding:0; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Timetable Generator</h1>
+  <p>Assign each section to a year and semester, then generate a conflict-free timetable.</p>
+</header>
+
+<main>
+  <!-- ===== Input form ===== -->
+  <section>
+    <h2>College setup</h2>
+    <div class="grid">
+      <label>Number of teachers <input id="teachers" type="number" min="1" max="200" value="60"></label>
+      <label>Number of sections <input id="sections" type="number" min="1" max="100" value="48"></label>
+      <label>Number of rooms <input id="rooms" type="number" min="1" max="200" value="50"></label>
+      <label>Working days (1–7) <input id="days" type="number" min="1" max="7" value="5"></label>
+      <label>Classes per day <input id="perDay" type="number" value="6" readonly></label>
+    </div>
+    <h3>Year and semester for each section</h3>
+    <div id="secRows" class="secBox"></div>
+    <button id="generate">Generate timetable</button>
+    <button id="reset" class="ghost" type="button">Reset values</button>
+    <div id="status"></div>
+  </section>
+
+  <!-- ===== Results (shown after generation) ===== -->
+  <section id="result" class="hidden">
+    <h2>Section timetable</h2>
+    <div class="row">
+      <label>Select section <select id="sectionSelect"></select></label>
+    </div>
+    <h3>Courses for this semester</h3>
+    <div class="chips" id="courseChips"></div>
+    <div class="wrap"><table id="table"></table></div>
+    <details><summary>Which teacher teaches which subject</summary><div id="teacherList" class="chips"></div></details>
+  </section>
+
+  <section id="report" class="hidden">
+    <h2>Conflict report</h2>
+    <div id="reportBody"></div>
+  </section>
+</main>
+
+<script>
+/* ====================== Fixed data ====================== */
+const PERIODS = 6;                                    // classes per day = courses per semester
+const DAY_NAMES = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const TIMES = ["9:00","10:00","11:00","12:00","2:00","3:00"];
+const ATTEMPTS = 300;                                 // random restarts per day (each is fast)
+
+/* 8 semester groups, exactly 6 courses each (index = (year-1)*2 + (semester-1)) */
+const GROUPS = [
+  { name:"1-1", courses:["Engineering Mathematics I","Engineering Physics","Programming in C","Basic Electrical Engineering","English Communication","Engineering Graphics"] },
+  { name:"1-2", courses:["Engineering Mathematics II","Engineering Chemistry","Data Structures","Digital Logic","Environmental Science","Workshop Practice"] },
+  { name:"2-1", courses:["Discrete Mathematics","Object-Oriented Programming","Computer Organization","Database Systems","Probability and Statistics","Analog Electronics"] },
+  { name:"2-2", courses:["Design and Analysis of Algorithms","Operating Systems","Theory of Computation","Software Engineering","Computer Networks","Microprocessors"] },
+  { name:"3-1", courses:["Compiler Design","Web Technologies","Artificial Intelligence","Information Security","Embedded Systems","Professional Elective I"] },
+  { name:"3-2", courses:["Machine Learning","Cloud Computing","Data Mining","Mobile Application Development","Professional Elective II","Open Elective I"] },
+  { name:"4-1", courses:["Deep Learning","Big Data Analytics","Internet of Things","Professional Elective III","Open Elective II","Project Phase I"] },
+  { name:"4-2", courses:["Blockchain Technology","Natural Language Processing","Professional Elective IV","Open Elective III","Project Phase II","Industrial Seminar"] }
+];
+/* Global course id = group*6 + position. Helpers: */
+const courseName = id => GROUPS[Math.floor(id / PERIODS)].courses[id % PERIODS];
+const groupCourseIds = g => Array.from({ length: PERIODS }, (_, k) => g * PERIODS + k);
+
+const $ = id => document.getElementById(id);
+let timetable = null;   // timetable[day][period][section] = {course, teacher, room}
+let config = null;      // {T, S, R, D, groups:[group index per section]}
+
+/* ====================== Helpers ====================== */
+function shuffle(arr) {                               // Fisher-Yates
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+/* Every teacher teaches exactly ONE subject (like a programming teacher who only teaches programming).
+   courseTeachers[courseId] = list of teachers who may teach that course; teacherCourse[t] = that teacher's subject. */
+let courseTeachers = {}, teacherCourse = [];
+function qualifiedTeachers(courseId) { return courseTeachers[courseId] || []; }
+
+/* Hands out teachers to the subjects in use. Each subject first gets as many teachers as it needs at the
+   same time (one per section running it in a period), then spare teachers are shared out evenly. */
+function assignTeachers(cfg) {
+  const count = {}; cfg.groups.forEach(g => count[g] = (count[g] || 0) + 1);
+  const used = [], need = {};
+  Object.keys(count).map(Number).sort((a, b) => a - b).forEach(g =>
+    groupCourseIds(g).forEach(c => { used.push(c); need[c] = Math.ceil(count[g] / PERIODS); }));
+  courseTeachers = {}; teacherCourse = Array(cfg.T).fill(null);
+  let t = 0;
+  used.forEach(c => { courseTeachers[c] = []; for (let k = 0; k < need[c]; k++) { courseTeachers[c].push(t); teacherCourse[t++] = c; } });
+  for (let i = 0; t < cfg.T; i++, t++) { const c = used[i % used.length]; courseTeachers[c].push(t); teacherCourse[t] = c; }
+}
+
+/* ====================== Section rows (year + semester pickers) ====================== */
+function buildSectionRows(keep) {
+  const n = Math.min(100, Math.max(1, parseInt($("sections").value, 10) || 1));
+  let html = "";
+  for (let i = 0; i < n; i++) {
+    const g = keep && keep[i] !== undefined ? keep[i] : Math.floor(i / 6) % 8;  // default: sections 1-6 = 1-1, 7-12 = 1-2, 13-18 = 2-1, ...
+    const y = Math.floor(g / 2) + 1, s = (g % 2) + 1;
+    html += `<div class="secRow"><b>Section ${i + 1}</b>
+      <label>Year <select class="yr">${[1,2,3,4].map(v => `<option ${v === y ? "selected" : ""}>${v}</option>`).join("")}</select></label>
+      <label>Semester <select class="sm">${[1,2].map(v => `<option ${v === s ? "selected" : ""}>${v}</option>`).join("")}</select></label></div>`;
+  }
+  $("secRows").innerHTML = html;
+}
+function readGroups() {                               // group index chosen for every section
+  const yrs = [...document.querySelectorAll(".yr")], sms = [...document.querySelectorAll(".sm")];
+  return yrs.map((y, i) => (+y.value - 1) * 2 + (+sms[i].value - 1));
+}
+
+/* ====================== Validation ====================== */
+function checkFeasibility(cfg) {
+  const problems = [];
+  if (cfg.R < cfg.S)
+    problems.push(`Not enough rooms: ${cfg.S} sections have a class in every period, so at least ${cfg.S} rooms are needed. You entered ${cfg.R}.`);
+  /* One subject per teacher: every subject in use needs its own teacher(s). A semester with more than 6 sections
+     runs the same subject in several sections at once, so that subject needs extra teachers. */
+  const counts = {}; cfg.groups.forEach(g => counts[g] = (counts[g] || 0) + 1);
+  const used = Object.keys(counts).length;
+  const needed = Object.values(counts).reduce((a, n) => a + PERIODS * Math.ceil(n / PERIODS), 0);
+  if (cfg.T < needed)
+    problems.push(`Not enough teachers: each teacher teaches only one subject. ${used} semester(s) in use have ${used * PERIODS} subjects and need at least ${needed} teachers. You entered ${cfg.T}.`);
+  return problems;
+}
+
+/* ====================== Scheduler ====================== */
+/* Builds one day in two steps (fast even for 48+ sections):
+   1. Course order: for each semester group, shuffle its 6 courses and give each section a different
+      cyclic shift. Each section therefore gets all 6 of its own courses exactly once per day.
+   2. Teachers: in every period, match sections to free teachers with bipartite matching,
+      so no teacher is in two sections in the same period. If a period cannot be matched, retry. */
+function buildDay(cfg) {
+  const { T, S, R, groups } = cfg;
+  for (let attempt = 0; attempt < ATTEMPTS; attempt++) {
+    // Step 1: choose the course of every section in every period
+    const perm = GROUPS.map((_, g) => shuffle(groupCourseIds(g)));       // random course order per group
+    const shifts = GROUPS.map(() => shuffle([0, 1, 2, 3, 4, 5]));        // distinct shifts per group
+    const seen = Array(GROUPS.length).fill(0);
+    const courseOf = groups.map(g => {
+      const shift = shifts[g][seen[g]++ % PERIODS];
+      return Array.from({ length: PERIODS }, (_, p) => perm[g][(p + shift) % PERIODS]);
+    });
+    // Step 2: assign teachers period by period
+    const grid = []; let ok = true;
+    for (let p = 0; p < PERIODS && ok; p++) {
+      const owner = Array(T).fill(-1);                                   // teacher -> section
+      const tryAssign = (s, visited) => {                                // Kuhn augmenting path
+        for (const t of shuffle(qualifiedTeachers(courseOf[s][p], T))) {
+          if (visited.has(t)) continue;
+          visited.add(t);
+          if (owner[t] === -1 || tryAssign(owner[t], visited)) { owner[t] = s; return true; }
+        }
+        return false;
+      };
+      for (let s = 0; s < S && ok; s++) ok = tryAssign(s, new Set());
+      if (!ok) break;
+      const row = Array(S);
+      owner.forEach((s, t) => { if (s !== -1) row[s] = { course: courseOf[s][p], teacher: t, room: (s + p) % R }; }); // room unique since S <= R
+      grid.push(row);
+    }
+    if (ok) return grid;
+  }
+  return null;
+}
+function generate(cfg) {
+  const result = [];
+  for (let d = 0; d < cfg.D; d++) {
+    const day = buildDay(cfg);
+    if (!day) return null;
+    result.push(day);
+  }
+  return result;
+}
+
+/* ====================== Conflict checker ====================== */
+/* Re-checks the finished timetable independently of the scheduler. */
+function findConflicts(tt, cfg) {
+  const out = { teacher: [], room: [], repeat: [], semester: [], empty: [], multi: [] };
+  const subjectsOf = {};                                // teacher -> set of subjects taught
+  tt.forEach((day, d) => {
+    day.forEach((period, p) => {
+      const teachers = {}, rooms = {}, where = `${DAY_NAMES[d]}, period ${p + 1}`;
+      period.forEach((cell, s) => {
+        if (!cell) { out.empty.push(`Section ${s + 1} is empty on ${where}`); return; }
+        (teachers[cell.teacher] ||= []).push(s + 1);
+        (subjectsOf[cell.teacher] ||= new Set()).add(cell.course);
+        (rooms[cell.room] ||= []).push(s + 1);
+      });
+      for (const t in teachers) if (teachers[t].length > 1)
+        out.teacher.push(`Teacher ${+t + 1} is in sections ${teachers[t].join(", ")} on ${where}`);
+      for (const r in rooms) if (rooms[r].length > 1)
+        out.room.push(`Room ${+r + 1} is used by sections ${rooms[r].join(", ")} on ${where}`);
+    });
+    for (let s = 0; s < cfg.S; s++) {
+      const seen = new Set(), own = new Set(groupCourseIds(cfg.groups[s]));
+      day.forEach(period => {
+        const c = period[s]; if (!c) return;
+        if (seen.has(c.course)) out.repeat.push(`Section ${s + 1} repeats "${courseName(c.course)}" on ${DAY_NAMES[d_(tt, day)]}`);
+        if (!own.has(c.course)) out.semester.push(`Section ${s + 1} has "${courseName(c.course)}" from another semester`);
+        seen.add(c.course);
+      });
+      if (seen.size < PERIODS) out.semester.push(`Section ${s + 1} is missing some semester courses on ${DAY_NAMES[d_(tt, day)]}`);
+    }
+  });
+  for (const t in subjectsOf) if (subjectsOf[t].size > 1)
+    out.multi.push(`Teacher ${+t + 1} teaches ${subjectsOf[t].size} different subjects`);
+  return out;
+}
+const d_ = (tt, day) => tt.indexOf(day);
+
+/* ====================== Rendering ====================== */
+function renderTable(s) {
+  const g = config.groups[s];
+  $("courseChips").innerHTML = GROUPS[g].courses.map(c => `<span class="chip">${c}</span>`).join("");
+  let html = "<thead><tr><th>Period</th>";
+  for (let d = 0; d < config.D; d++) html += `<th>${DAY_NAMES[d]}</th>`;
+  html += "</tr></thead><tbody>";
+  for (let p = 0; p < PERIODS; p++) {
+    html += `<tr><th>${p + 1}<br><span class="meta">${TIMES[p]}</span></th>`;
+    for (let d = 0; d < config.D; d++) {
+      const c = timetable[d][p][s];
+      html += `<td><div class="course">${courseName(c.course)}</div>
+        <div class="meta">Teacher ${c.teacher + 1} · Room ${c.room + 1}</div></td>`;
+    }
+    html += "</tr>";
+  }
+  $("table").innerHTML = html + "</tbody>";
+}
+function renderReport(conf) {
+  const total = Object.values(conf).reduce((a, l) => a + l.length, 0);
+  const block = (title, list) => list.length
+    ? `<div class="msg error"><b>${title} (${list.length})</b><ul>${list.slice(0, 10).map(x => `<li>${x}</li>`).join("")}</ul></div>` : "";
+  $("reportBody").innerHTML =
+    `<div class="stats">
+       <div class="stat">Teacher clashes: <b>${conf.teacher.length}</b></div>
+       <div class="stat">Room clashes: <b>${conf.room.length}</b></div>
+       <div class="stat">Repeated courses in a day: <b>${conf.repeat.length}</b></div>
+       <div class="stat">Wrong or missing semester courses: <b>${conf.semester.length}</b></div>
+       <div class="stat">Empty slots: <b>${conf.empty.length}</b></div>
+       <div class="stat">Teachers with 2+ subjects: <b>${conf.multi.length}</b></div>
+     </div>` +
+    (total === 0
+      ? `<div class="msg ok">No conflicts found. Every section has all 6 courses of its semester each day, and every teacher teaches one subject only.</div>`
+      : block("Teacher clashes", conf.teacher) + block("Room clashes", conf.room) + block("Repeated courses", conf.repeat) +
+        block("Semester course problems", conf.semester) + block("Empty slots", conf.empty) +
+        block("Teachers with several subjects", conf.multi));
+}
+function showError(list, title) {
+  $("status").innerHTML = `<div class="msg error"><b>${title}</b><ul>${list.map(x => `<li>${x}</li>`).join("")}</ul></div>`;
+  $("result").classList.add("hidden");
+  $("report").classList.add("hidden");
+}
+
+/* ====================== Events ====================== */
+$("sections").addEventListener("change", () => buildSectionRows(readGroups()));  // keep existing picks
+
+$("generate").addEventListener("click", () => {
+  const num = (id, min, max) => Math.min(max, Math.max(min, parseInt($(id).value, 10) || min));
+  config = { T: num("teachers", 1, 200), S: num("sections", 1, 100), R: num("rooms", 1, 200), D: num("days", 1, 7) };
+  $("teachers").value = config.T; $("sections").value = config.S; $("rooms").value = config.R; $("days").value = config.D;
+  config.groups = readGroups();
+
+  const problems = checkFeasibility(config);                 // step 1: clear reasons
+  if (problems.length) return showError(problems, "A valid timetable cannot be generated with these numbers");
+
+  assignTeachers(config);                                    // step 2: one subject per teacher
+  timetable = generate(config);                              // step 3: search
+  if (!timetable) return showError(
+    ["The scheduler could not place every class without a clash.",
+     "Try adding more teachers, or reduce the number of sections."], "No valid timetable found");
+
+  $("status").innerHTML = `<div class="msg ok">Timetable generated for ${config.S} section(s) over ${config.D} day(s).</div>`;
+  $("sectionSelect").innerHTML = config.groups.map((g, i) =>
+    `<option value="${i}">Section ${i + 1} (Year ${Math.floor(g / 2) + 1}, Semester ${(g % 2) + 1})</option>`).join("");
+  $("result").classList.remove("hidden");
+  $("report").classList.remove("hidden");
+  $("teacherList").innerHTML = Object.keys(courseTeachers).map(c =>
+    `<span class="chip"><b>${courseName(+c)}</b>: ${courseTeachers[c].map(t => "Teacher " + (t + 1)).join(", ")}</span>`).join("");
+  renderTable(0);
+  renderReport(findConflicts(timetable, config));
+});
+$("sectionSelect").addEventListener("change", e => renderTable(+e.target.value));
+$("reset").addEventListener("click", () => {
+  $("teachers").value = 60; $("sections").value = 48; $("rooms").value = 50; $("days").value = 5;
+  buildSectionRows();
+});
+buildSectionRows();
+</script>
+</body>
+</html>

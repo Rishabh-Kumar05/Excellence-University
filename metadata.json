@@ -1,0 +1,6 @@
+{
+  "name": "Excellence University",
+  "description": "Academic portal for Excellence University featuring course enrollment, administrative office appointments, faculty directory, student hub, and academic calendar.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
